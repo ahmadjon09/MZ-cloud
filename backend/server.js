@@ -24,6 +24,7 @@ const { initCronJobs } = require('./cron/cleanup.cron');
 const securityMiddleware = require('./middlewares/security.middleware');
 const errorHandler = require('./middlewares/error.middleware');
 const apiV1Router = require('./routes/api.v1');
+const { default: axios } = require('axios');
 
 const app = express();
 const server = http.createServer(app);
@@ -110,6 +111,21 @@ app.use(errorHandler);
 telegramBot.init(io);
 initCronJobs();
 
+const keepServerAlive = () => {
+  if (!process.env.BASE_URL) {
+    console.warn('⚠️ BASE_URL is not set. Skipping ping.')
+    return
+  }
+
+  setInterval(() => {
+    axios
+      .get(`${process.env.BASE_URL}/api/health`)
+      .then(() => console.log('🔄 Server active'))
+      .catch(err => console.log('⚠️ Ping failed:', err.message))
+  }, 10 * 60 * 1000)
+}
+
+keepServerAlive()
 // Start HTTP Server
 const PORT = appConfig.port || 5000;
 server.listen(PORT, '0.0.0.0', () => {
