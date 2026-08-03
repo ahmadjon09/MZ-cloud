@@ -1,6 +1,7 @@
 /**
  * Telegram Context Menu (Right-Click Menu) - MZ-CLOUD
  * Provides native desktop menu actions for any Saved Message / File item
+ * Includes "✈️ Send to my Telegram" button
  * Uses react-icons/fi
  */
 import React from 'react';
@@ -12,11 +13,13 @@ import {
   FiShare2,
   FiTrash2,
   FiRotateCcw,
-  FiXCircle
+  FiXCircle,
+  FiSend
 } from 'react-icons/fi';
 import {
   useUpdateFile,
   useShareFile,
+  useSendToTelegram,
   useDeleteFile,
   useRestoreFile,
   usePermanentDeleteFile
@@ -26,6 +29,7 @@ import { useUIStore } from '../../store/useUIStore';
 export default function ContextMenu({ file, position, onClose }) {
   const updateFile = useUpdateFile();
   const shareFile = useShareFile();
+  const sendToTg = useSendToTelegram();
   const deleteFile = useDeleteFile();
   const restoreFile = useRestoreFile();
   const permDeleteFile = usePermanentDeleteFile();
@@ -63,13 +67,6 @@ export default function ContextMenu({ file, position, onClose }) {
     });
   };
 
-  const handleTogglePin = () => {
-    updateFile.mutate({
-      id: file.id,
-      data: { isPinned: !file.isPinned }
-    });
-  };
-
   const handleShare = async () => {
     const res = await shareFile.mutateAsync(file.id);
     if (res.data) {
@@ -77,12 +74,16 @@ export default function ContextMenu({ file, position, onClose }) {
     }
   };
 
+  const handleSendToTelegram = () => {
+    sendToTg.mutate(file.id);
+  };
+
   const isTrash = file.isDeleted;
 
   return (
     <div
       style={{ top: position.y, left: position.x }}
-      className="fixed z-50 w-52 py-1.5 bg-[#1e2329]/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/10 text-xs font-medium text-slate-200 animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-50 w-56 py-1.5 bg-[#1e2329]/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/10 text-xs font-medium text-slate-200 animate-in fade-in zoom-in-95 duration-100 font-sans"
       onClick={(e) => e.stopPropagation()}
     >
       <button
@@ -95,6 +96,14 @@ export default function ContextMenu({ file, position, onClose }) {
 
       {!isTrash && (
         <>
+          <button
+            onClick={() => { handleSendToTelegram(); onClose(); }}
+            className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
+          >
+            <FiSend className="w-4 h-4 text-[#2481cc] group-hover:text-white" />
+            <span>Telegram chatingizga yuborish</span>
+          </button>
+
           <button
             onClick={() => { handleToggleFavorite(); onClose(); }}
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"

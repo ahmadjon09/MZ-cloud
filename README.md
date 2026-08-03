@@ -1,4 +1,4 @@
-# ☁️ Telegram Cloud Storage Platform (TG-Cloud)
+# ☁️ MZ-CLOUD — Telegram CDN Cloud Storage Platform
 ### *Production-Ready Personal Cloud Storage Built on Telegram CDN & Saved Messages*
 
 [![Node.js](https://img.shields.io/badge/Node.js-v20%20LTS-green.svg)](https://nodejs.org/)
@@ -9,10 +9,10 @@
 ---
 
 ## 🏛️ Architecture & Core Philosophy: Zero Server Storage & Strict Data Isolation
-Unlike traditional storage platforms that require massive server hard drive arrays, **TG-Cloud** leverages **Telegram's secure CDN** as its data layer.
+Unlike traditional storage platforms that require massive server hard drive arrays, **MZ-CLOUD** leverages **Telegram's secure CDN** as its data layer.
 
 - **Never Save Files to Server Disk:** All Photos, Videos, Audio tracks, Voice notes, Documents, Archives, and Code files stay 100% inside Telegram servers.
-- **Strict Multi-Tenant Data Isolation:** No user can ever view, search, or access another user's files or folders. Every single database query strictly enforces `userId` filtering.
+- **Strict Multi-Tenant Data Isolation:** Every database query strictly filters by `userId` or `user.telegramId`. No user can ever view, search, or access another user's files or folders.
 - **What Our Server Stores:**
   - Telegram `fileId` and `uniqueFileId` references.
   - User-defined nested folder hierarchy.
@@ -27,46 +27,41 @@ Unlike traditional storage platforms that require massive server hard drive arra
 
 ## 🚀 Key Features
 
-### 1. 👥 Telegram WebApp & Bot Native Login
-- Auto-provisioning via Telegram Login Widget (`X-Telegram-Init-Data` HMAC-SHA256 signature verification).
+### 1. 👥 Telegram WebApp Exclusive Access & Live Avatar
+- **Exclusive Telegram App Access:** Cannot be opened in external web browsers. Enforces `window.Telegram.WebApp` verification.
+- **Live User Profile Avatar:** Displays the user's current Telegram profile photo (`user.profilePhoto` / `photo_url`) in the dashboard header.
 - Automatically assigns `SUPER_ADMIN` role to the user matching `ADMIN_TELEGRAM_ID`.
 
-### 2. 📱 100% Mobile Responsive & Lucide Vector Icons
-- Built with crisp **Lucide React vector icons** across the entire UI (no unicode text emojis in frontend).
+### 2. 🔍 Telegram Inline Search Mode (`@MZCloudBot <query>`)
+- Users can type `@MZCloudBot <query>` inside **any Telegram chat, group, or channel** to instantly search all of their personal cloud files and send an interactive file card to their friends!
+
+### 3. 📱 100% Mobile Responsive & Feather Vector Icons (`react-icons/fi`)
+- Built with crisp **Feather Icons (`react-icons/fi`)** across the entire UI (no unicode text emojis in frontend).
+- **Glassmorphism Telegram Desktop Design:** Sleek `#1e2329/90` translucent cards with Telegram Blue `#2481cc` accents and smooth micro-animations.
 - **Mobile Drawer Navigation:** Responsive slide-over hamburger drawer for mobile devices and resizable sidebar for desktop screens.
 
-### 3. 🤖 Super-Fast Telegram Bot with i18n & Telegram Premium Emojis
-- **Lightning-Fast Execution:** Non-blocking async handlers and immediate callback query responses (`answerCbQuery`) so buttons never hang.
-- **Telegram Premium Custom Emojis:** Renders localized messages in HTML with `<tg-emoji emoji-id="...">` tags whenever supported.
-- **Full Bot i18n:** Automatically responds in **Uzbek (`uz`)**, **English (`en`)**, or **Russian (`ru`)** based on user language.
+### 4. 🤖 Super-Fast Telegram Bot with i18n & All Interactive Menus
+- **Lightning-Fast Execution:** Non-blocking async handlers and immediate callback query responses (`answerCbQuery`).
+- **Interactive Buttons:** `[📝 Note]` and `[🏷️ Tags]` buttons allow replying with text or selecting tags directly in Telegram.
+- **Full Bot i18n:** Automatically responds in **Uzbek (`uz`)**, **English (`en`)**, or **Russian (`ru`)** based on user language via `/lang` or language switcher menu.
+- **Every Menu Works:** Every single menu includes an interactive **"🔙 Go Back (`back_to_main`)"** button.
 
-### 4. 📂 Enterprise Folder & Tag System
+### 5. 🖼️ Live Telegram CDN Photo Streaming & File Download
+- **Real Photo Thumbnails:** Displays actual Telegram CDN photo thumbnails in the WebApp gallery via `/api/v1/files/:id/thumbnail`.
+- **Original CDN Download / Stream:** Stream or download any original file (Photo, Video, PDF, Audio, Code) directly from Telegram CDN via `/api/v1/files/:id/download`.
+
+### 6. 📂 Enterprise Folder & Tag System
 - **Nested Folders:** Unlimited multi-level tree hierarchy with vector icons and custom hex colors.
 - **Smart Folders:** Dynamic folders filtering automatically by category (`PHOTO`, `VIDEO`, `FAVORITE`).
 - **Colored Tags:** Manage tag badges for instant filtering.
 
-### 5. 🖼️ Telegram Gallery & Media Players
-- **Telegram Gallery Viewer:** Fullscreen image modal with Zoom in/out, swipe navigation, keyboard controls (`Esc`, `Left`, `Right`), EXIF details drawer, and note editor.
-- **Telegram Video Player:** Video modal with Playback Speed (`0.5x` to `2x`), Picture-in-Picture, position memory, and keyboard controls (`Space` to pause/play).
-- **Persistent Audio Bar Player:** Waveform visualization, Playlist queue, Repeat, Shuffle, Speed, Seek, and Mini Player mode.
-- **Code & Markdown Preview:** Syntax-highlighted viewer for `.js`, `.py`, `.md`, `.json`, `.html`, etc.
-
-### 6. ⚡ Instant Spotlight Search (PostgreSQL FTS + Redis Cache)
-- Search across file names, folders, extensions, captions, notes, and tags in milliseconds.
-- Redis caching for instant search responsiveness.
-
-### 7. 🔄 Parallel Bulk Upload & Worker Pools
-- Asynchronous worker queue processing 10 to 1,000 files in parallel without blocking the Event Loop.
-- Includes a one-click **"Generate Demo Files"** tool to instantly seed sample media for testing.
-
-### 8. 🛡️ Super Admin Panel (`/admin`)
+### 7. 🛡️ Super Admin Panel (`/admin`)
+- Accessible via `/admin` in the WebApp or the **"🛡️ Super Admin Panel"** button in the bot (for authorized admins only).
+- Non-admin users are blocked with an explicit **Admin Authorization Required** screen.
 - Realtime system monitoring (Redis cache status, PostgreSQL DB latency, active worker queue length, RAM usage, CPU load).
 - User Management table with Ban / Unban controls and ban reason logging.
 - Audit Log stream tracking security events.
 - **Broadcast Announcement Tool:** Send messages to all active bot users.
-
-### 9. 🌍 Full Internationalization (i18next)
-- Complete translations in **English (`en`)**, **Russian (`ru`)**, and **Uzbek (`uz`)** across both the WebApp and Telegram Bot.
 
 ---
 
@@ -80,23 +75,23 @@ Unlike traditional storage platforms that require massive server hard drive arra
 │   ├── controllers/        # REST controllers (Auth, File, Folder, Search, Admin, Share)
 │   ├── cron/               # Scheduled daily Recycle Bin purge (>30 days)
 │   ├── middlewares/        # JWT + Telegram HMAC Auth, RBAC, Rate Limiting, Security, Errors
-│   ├── prisma/             # Schema & Seed script
+│   ├── prisma/             # Schema & Seed script (0 demo files; only Super Admin)
 │   ├── queues/             # Parallel upload processing worker pool
-│   ├── repositories/       # Prisma data access layer with strict userId isolation
+│   ├── repositories/       # Prisma data access layer with strict userId/telegramId isolation
 │   ├── routes/             # OpenAPI documented versioned router (/api/v1) + Swagger UI (/docs)
 │   ├── services/           # Core business logic (Auth, File, Search, Folder, Statistics)
 │   ├── socket/             # Realtime Socket.IO server
 │   ├── telegram/
-│   │   ├── commands/       # /start, /help, /stats commands
-│   │   ├── handlers/       # Non-blocking media & callback handlers
+│   │   ├── commands/       # /start, /help, /stats, /lang commands
+│   │   ├── handlers/       # Non-blocking media, text reply, inline search (@MZCloudBot), & callback handlers
 │   │   ├── i18n/           # Localized bot messages (uz, en, ru)
-│   │   └── utils/          # Telegram Premium Custom Emoji (<tg-emoji>) formatting
+│   │   └── utils/          # Standard Telegram symbol formatting
 │   └── validators/         # Zod schemas with Telegram size limit enforcement
 ├── client/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── admin/      # Super Admin Panel
-│   │   │   ├── layout/     # Header (mobile menu toggle), Sidebar (drawer/resizable), AudioBar
+│   │   │   ├── layout/     # Header (user profile photo avatar), Sidebar (drawer/resizable), AudioBar
 │   │   │   ├── media/      # FileGrid, FileCard, ContextMenu, Gallery/Video/Code Modals
 │   │   │   └── modals/     # SearchModal, NoteEditorModal, TagEditorModal, FolderModal, ShareModal
 │   │   ├── hooks/          # TanStack Query custom hooks
@@ -113,25 +108,26 @@ Unlike traditional storage platforms that require massive server hard drive arra
 
 ## ⚡ Quickstart Guide
 
-1. **Install Dependencies & Seed Sample Data:**
+1. **Install Dependencies & Seed Database:**
    ```bash
    npm run postinstall
    npm run db:push
    node backend/prisma/seed.js
    ```
 
-2. **Start Backend API & Frontend Development Server Concurrently:**
+2. **Start MZ-CLOUD Backend & Frontend Development Server Concurrently:**
    ```bash
    npm run dev
    ```
 
 3. **Access the Platform:**
-   - **Web Application:** `http://localhost:5173`
+   - **Web Application (inside Telegram):** `http://localhost:5173`
    - **OpenAPI Swagger Docs:** `http://localhost:5000/api/v1/docs`
-   - **Super Admin Account:** Automatically logged in via demo mode or Telegram ID `777000`.
+   - **Super Admin Account:** Automatically logged in via Telegram ID `777000`.
 
 ---
 
-## 🔒 Security & Tenant Isolation Rules
-1. **Multi-Tenant Isolation:** Every user query is filtered by `where: { userId }`. Users can never access, edit, or search any file or folder outside their own account.
-2. **File Size Enforcement:** Photos exceeding **10 MB** and videos/audio/documents exceeding **50 MB** are rejected at the Bot, API, and validation layers with localized error messages.
+## 🌐 Vercel & Render Integration
+- **Frontend URL:** `https://mz-cloud.vercel.app`
+- **Backend URL:** `https://mz-cloud.onrender.com`
+- `client/src/services/api.js` and `socket.js` automatically route API and WebSocket traffic to `https://mz-cloud.onrender.com/api/v1` when running on `vercel.app`.

@@ -1,6 +1,6 @@
 /**
- * Authentication Middleware (Production Quality)
- * Requires valid Bearer JWT access token or Telegram WebApp initData / user headers
+ * Authentication Middleware (Production Quality - MZ-CLOUD)
+ * Supports Bearer JWT token, Telegram WebApp initData headers, and query parameters (?token=&tgId=) for browser media tags
  */
 const jwt = require('jsonwebtoken');
 const appConfig = require('../config/app.config');
@@ -12,15 +12,18 @@ async function authMiddleware(req, res, next) {
   try {
     let user = null;
 
-    // 1. Check Authorization Bearer Token
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '').trim();
+    // 1. Check Authorization Bearer Token (Header or Query ?token=)
+    const tokenStr =
+      (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')
+        ? req.headers.authorization.replace('Bearer ', '').trim()
+        : null) || req.query.token;
+
+    if (tokenStr) {
       try {
-        const decoded = jwt.verify(token, appConfig.jwtSecret);
+        const decoded = jwt.verify(tokenStr, appConfig.jwtSecret);
         user = await userRepository.findById(decoded.id);
       } catch (e) {
-        // Token invalid or expired, check Telegram headers
+        // Token invalid or expired, check Telegram headers/params
       }
     }
 
@@ -39,13 +42,13 @@ async function authMiddleware(req, res, next) {
           res.setHeader('X-Refresh-Token', authResult.refreshToken);
         }
       } catch (e) {
-        // Fallthrough to check X-Telegram-User-Id / X-Telegram-User-Data
+        // Fallthrough
       }
     }
 
-    // 3. Fallback to X-Telegram-User-Id / X-Telegram-User-Data from Telegram WebApp
-    if (!user && req.headers['x-telegram-user-id']) {
-      const tgId = String(req.headers['x-telegram-user-id']);
+    // 3. Check X-Telegram-User-Id / X-Telegram-User-Data or ?tgId= query parameter
+    if (!user) {
+      const tgId = String(req.headers['x-telegram-user-id'] || req.query.tgId || '');
       let tgProfile = null;
       if (req.headers['x-telegram-user-data']) {
         try {
@@ -63,7 +66,7 @@ async function authMiddleware(req, res, next) {
         user = authResult.user;
         res.setHeader('X-Access-Token', authResult.accessToken);
         res.setHeader('X-Refresh-Token', authResult.refreshToken);
-      } else if (tgId) {
+      } else if (tgId && tgId !== '') {
         user = await userRepository.findByTelegramId(tgId);
       }
     }

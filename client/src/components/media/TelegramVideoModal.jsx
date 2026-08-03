@@ -1,6 +1,7 @@
 /**
  * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi)
  * Supports Playback Speed (0.5x to 2x), Picture-in-Picture, position memory, and keyboard controls
+ * Includes "Send to my Telegram" button
  */
 import React from 'react';
 import {
@@ -11,12 +12,15 @@ import {
   FiVolume2,
   FiVolumeX,
   FiRotateCcw,
-  FiRotateCw
+  FiRotateCw,
+  FiSend
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
+import { useSendToTelegram } from '../../hooks/useFiles';
 
 export default function TelegramVideoModal() {
   const { activeVideoModalFile, closeVideoPlayer } = useUIStore();
+  const sendToTg = useSendToTelegram();
   const videoRef = React.useRef(null);
 
   const [isPlaying, setIsPlaying] = React.useState(true);
@@ -116,10 +120,10 @@ export default function TelegramVideoModal() {
 
   const sampleVideoUrl =
     activeVideoModalFile.thumbnailUrl ||
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    `/api/v1/files/${activeVideoModalFile.id}/stream`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200 font-sans">
       {/* Top Header */}
       <div className="h-16 px-6 flex items-center justify-between text-white bg-gradient-to-b from-black/70 to-transparent z-10">
         <div className="truncate">
@@ -127,16 +131,26 @@ export default function TelegramVideoModal() {
             {activeVideoModalFile.fileName}
           </h3>
           <span className="text-xs text-slate-400">
-            Telegram CDN Cloud Player — Position Auto-Remembered
+            MZ-CLOUD Telegram CDN Player — Position Auto-Remembered
           </span>
         </div>
 
-        <button
-          onClick={closeVideoPlayer}
-          className="p-2 text-slate-300 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
-        >
-          <FiX className="w-6 h-6" />
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => sendToTg.mutate(activeVideoModalFile.id)}
+            disabled={sendToTg.isPending}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-colors shadow-md disabled:opacity-50"
+          >
+            <FiSend className="w-4 h-4" />
+            <span>{sendToTg.isPending ? 'Yuborilmoqda...' : 'Telegramga Yuborish'}</span>
+          </button>
+          <button
+            onClick={closeVideoPlayer}
+            className="p-2 text-slate-300 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
+          >
+            <FiX className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Main Video Viewport */}

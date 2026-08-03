@@ -1,5 +1,6 @@
 /**
- * TanStack Query Hooks for Files & Saved Messages items
+ * TanStack Query Hooks for Files & Saved Messages items (MZ-CLOUD)
+ * Includes useSendToTelegram() hook to forward any CDN file directly to the user's Telegram chat
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
@@ -26,24 +27,6 @@ export function useFilesList(options = {}) {
       return res.data;
     },
     keepPreviousData: true
-  });
-}
-
-export function useGenerateDemoFiles() {
-  const queryClient = useQueryClient();
-  const uploadStore = useUploadStore();
-
-  return useMutation({
-    mutationFn: async () => {
-      const res = await api.post('/files/demo-generator');
-      return res.data;
-    },
-    onSuccess: (data) => {
-      uploadStore.addNotification(`🎉 ${data.count} Demo Files Generated & Indexed!`, 'success');
-      queryClient.invalidateQueries({ queryKey: ['files'] });
-      queryClient.invalidateQueries({ queryKey: ['authMe'] });
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-    }
   });
 }
 
@@ -113,6 +96,20 @@ export function useShareFile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files'] });
+    }
+  });
+}
+
+export function useSendToTelegram() {
+  const uploadStore = useUploadStore();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const res = await api.post(`/files/${id}/send-to-telegram`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      uploadStore.addNotification('✈️ Fayl Telegram chatingizga yuborildi!', 'success');
     }
   });
 }

@@ -1,6 +1,7 @@
 /**
  * Telegram Gallery Modal Viewer (Images & Photos) - react-icons/fi
  * Directly renders real Telegram CDN image stream
+ * Includes "Send to my Telegram" button
  */
 import React from 'react';
 import {
@@ -15,10 +16,11 @@ import {
   FiFileText,
   FiTag,
   FiStar,
-  FiShare2
+  FiShare2,
+  FiSend
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
-import { useUpdateFile, useShareFile } from '../../hooks/useFiles';
+import { useUpdateFile, useShareFile, useSendToTelegram } from '../../hooks/useFiles';
 
 export default function TelegramGalleryModal({ files = [] }) {
   const {
@@ -31,6 +33,7 @@ export default function TelegramGalleryModal({ files = [] }) {
   } = useUIStore();
   const updateFile = useUpdateFile();
   const shareFile = useShareFile();
+  const sendToTg = useSendToTelegram();
 
   const [zoom, setZoom] = React.useState(1);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -108,7 +111,7 @@ export default function TelegramGalleryModal({ files = [] }) {
     `/api/v1/files/${activeImageModalFile.id}/thumbnail`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200 font-sans">
       {/* Top Bar Controls */}
       <div className="h-16 px-6 flex items-center justify-between text-white bg-gradient-to-b from-black/60 to-transparent z-10">
         <div className="flex items-center space-x-3 truncate">
@@ -229,8 +232,17 @@ export default function TelegramGalleryModal({ files = [] }) {
         </div>
       )}
 
-      {/* Bottom Actions Toolbar: Note, Tag, Favorite, Share */}
-      <div className="h-16 px-6 flex items-center justify-center space-x-6 text-white bg-gradient-to-t from-black/60 to-transparent z-10">
+      {/* Bottom Actions Toolbar: Send to Telegram, Favorite, Note, Tag, Share */}
+      <div className="h-16 px-6 flex items-center justify-center space-x-4 text-white bg-gradient-to-t from-black/60 to-transparent z-10">
+        <button
+          onClick={() => sendToTg.mutate(activeImageModalFile.id)}
+          disabled={sendToTg.isPending}
+          className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-colors shadow-md disabled:opacity-50"
+        >
+          <FiSend className="w-4 h-4" />
+          <span>{sendToTg.isPending ? 'Yuborilmoqda...' : 'Telegramga Yuborish'}</span>
+        </button>
+
         <button
           onClick={handleToggleFav}
           className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
@@ -248,7 +260,7 @@ export default function TelegramGalleryModal({ files = [] }) {
           className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
         >
           <FiFileText className="w-4 h-4" />
-          <span>Private Notes</span>
+          <span>Notes</span>
         </button>
 
         <button

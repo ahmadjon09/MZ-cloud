@@ -1,11 +1,13 @@
 /**
  * Standalone Public Shared File Page (MZ-CLOUD - react-icons/fi)
  * Displays Telegram Saved Message metadata for public share links (/share/:token)
+ * Includes "Send to my Telegram" button
  */
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
+import { useSendToTelegram } from '../hooks/useFiles';
 import {
   FiImage,
   FiVideo,
@@ -16,11 +18,13 @@ import {
   FiExternalLink,
   FiCloud,
   FiAlertTriangle,
-  FiUser
+  FiUser,
+  FiSend
 } from 'react-icons/fi';
 
 export default function SharedFilePage() {
   const { token } = useParams();
+  const sendToTg = useSendToTelegram();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['sharedFile', token],
@@ -51,7 +55,7 @@ export default function SharedFilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#17212b] text-slate-400">
+      <div className="min-h-screen flex items-center justify-center bg-[#17212b] text-slate-400 font-sans">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-8 h-8 border-3 border-[#2481cc] border-t-transparent rounded-full animate-spin" />
           <span>Loading Shared MZ-CLOUD File...</span>
@@ -125,12 +129,21 @@ export default function SharedFilePage() {
 
         {/* Actions */}
         <div className="w-full space-y-3">
+          <button
+            onClick={() => sendToTg.mutate(file.id)}
+            disabled={sendToTg.isPending}
+            className="w-full py-3 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl flex items-center justify-center space-x-2 shadow-md transition-all disabled:opacity-50"
+          >
+            <FiSend className="w-4 h-4" />
+            <span>{sendToTg.isPending ? 'Yuborilmoqda...' : 'Telegram chatingizga yuborish'}</span>
+          </button>
+
           <Link
             to="/"
-            className="w-full py-3 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl flex items-center justify-center space-x-2 shadow-md transition-all"
+            className="w-full py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-all"
           >
             <FiExternalLink className="w-4 h-4" />
-            <span>Open in MZ-CLOUD Storage</span>
+            <span>MZ-CLOUD ilovasida ochish</span>
           </Link>
 
           <div className="text-[10px] text-slate-400">

@@ -1,7 +1,7 @@
 /**
- * File Controller (Production Quality)
+ * File Controller (Production Quality - MZ-CLOUD)
  * API endpoints for managing Saved Messages / File items & parallel upload batching
- * Includes live Telegram CDN thumbnail streaming
+ * Includes live Telegram CDN thumbnail streaming, file stream/download, and "Send by Telegram"
  */
 const axios = require('axios');
 const fileService = require('../services/file.service');
@@ -68,12 +68,10 @@ class FileController {
         });
       }
 
-      // If file has an explicit thumbnail URL, redirect to it
       if (file.thumbnailUrl) {
         return res.redirect(file.thumbnailUrl);
       }
 
-      // Attempt to stream live image from Telegram CDN via Bot API
       const bot = telegramBot.getBot();
       if (bot && bot.telegram && file.fileId) {
         try {
@@ -94,7 +92,6 @@ class FileController {
         }
       }
 
-      // Fallback clean SVG if Telegram API is offline/simulated
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="none">
         <rect width="600" height="400" fill="#1e2329"/>
         <circle cx="300" cy="180" r="48" fill="#2481cc" opacity="0.2"/>
@@ -106,6 +103,161 @@ class FileController {
       res.setHeader('Content-Type', 'image/svg+xml');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       return res.status(200).send(svg);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * Securely stream or download real media file from Telegram CDN
+   */
+  async getDownload(req, res, next) {
+    try {
+      const file = await fileService.getFileById(req.params.id, req.user.id);
+      if (!file) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'ERR_NOT_FOUND', message: 'File not found or access denied' }
+        });
+      }
+
+      const bot = telegramBot.getBot();
+      if (bot && bot.telegram && file.fileId) {
+        try {
+          const cdnLink = await bot.telegram.getFileLink(file.fileId);
+          const cdnUrl = cdnLink.href || cdnLink.toString();
+
+          const cdnResponse = await axios({
+            url: cdnUrl,
+            method: 'GET',
+            responseType: 'stream'
+          });
+
+          const isDownload = req.query.download === 'true';
+          res.setHeader('Content-Type', file.mimeType || cdnResponse.headers['content-type'] || 'application/octet-stream');
+          res.setHeader(
+            'Content-Disposition',
+            `${isDownload ? 'attachment' : 'inline'}; filename="${encodeURIComponent(file.fileName)}"`
+          );
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          return cdnResponse.data.pipe(res);
+        } catch (cdnErr) {
+          logger.warn({ err: cdnErr.message, fileId: file.fileId }, 'Could not stream from Telegram CDN download link');
+        }
+      }
+
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'ERR_TELEGRAM_CDN',
+          message: 'Telegram CDN file stream unavailable in simulation mode. Connect a live TELEGRAM_BOT_TOKEN to stream original CDN files.'
+        }
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * "Send by Telegram" — Sends/forwards the Telegram CDN file directly back to the user's own Telegram chat
+   */
+  async sendToTelegram(req, res, next) {
+    try {
+      const file = await fileService.getFileById(req.params.id, req.user.id);
+      if (!file) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'ERR_NOT_FOUND', message: 'File not found or access denied' }
+        });
+      }
+
+      const bot = telegramBot.getBot();
+      const targetTelegramId = req.user.telegramId;
+
+      const sizeMb = (file.fileSize / 1024 / 1024).toFixed(2);
+      const captionText = `☁️ <b>MZ-CLOUD — Telegram CDN Fayl:</b>\n\n` +
+        `📄 <b>Nomi:</b> <code>${file.fileName}</code>\n` +
+        `📦 <b>Hajmi:</b> <code>${sizeMb} MB</code>\n` +
+        `🏷️ <b>Toifa:</b> <code>#${file.category}</code>\n` +
+        (file.caption ? `💬 <b>Izoh:</b> <i>${file.caption}</i>\n` : '') +
+        `\nFaylni ko'rish va boshqarish uchun MZ-CLOUD ilovasini oching:`;
+
+      const replyMarkup = {
+        inline_keyboard: [
+          [
+            {
+              text: '🌐 MZ-CLOUD da ochish / Open App',
+              web_app: { url: (process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app') + `/?file=${file.id}` }
+            }
+          ]
+        ]
+      };
+
+      if (bot && bot.telegram && file.fileId) {
+        try {
+          if (file.category === 'PHOTO') {
+            await bot.telegram.sendPhoto(targetTelegramId, file.fileId, {
+              caption: captionText,
+              parse_mode: 'HTML',
+              reply_markup: replyMarkup
+            });
+          } else if (file.category === 'VIDEO') {
+            await bot.telegram.sendVideo(targetTelegramId, file.fileId, {
+              caption: captionText,
+              parse_mode: 'HTML',
+              reply_markup: replyMarkup
+            });
+          } else if (file.category === 'AUDIO') {
+            await bot.telegram.sendAudio(targetTelegramId, file.fileId, {
+              caption: captionText,
+              parse_mode: 'HTML',
+              reply_markup: replyMarkup
+            });
+          } else if (file.category === 'VOICE') {
+            await bot.telegram.sendVoice(targetTelegramId, file.fileId, {
+              caption: captionText,
+              parse_mode: 'HTML',
+              reply_markup: replyMarkup
+            });
+          } else {
+            await bot.telegram.sendDocument(targetTelegramId, file.fileId, {
+              caption: captionText,
+              parse_mode: 'HTML',
+              reply_markup: replyMarkup
+            });
+          }
+
+          logger.info({ userId: req.user.id, telegramId: targetTelegramId, fileId: file.id }, '✈️ File sent by Telegram to user chat');
+
+          return res.status(200).json({
+            success: true,
+            data: {
+              sent: true,
+              message: 'Fayl Telegram chatingizga yuborildi!'
+            }
+          });
+        } catch (tgErr) {
+          logger.warn({ err: tgErr.message, fileId: file.id }, 'Failed to send file via Telegram API');
+          return res.status(500).json({
+            success: false,
+            error: {
+              code: 'ERR_TELEGRAM_API',
+              message: 'Telegram chatingizga yuborishda xatolik: ' + tgErr.message
+            }
+          });
+        }
+      }
+
+      // Simulated response if running in local dev / without live Bot Token
+      logger.info({ fileId: file.id }, '✈️ Simulated sendToTelegram in dev mode');
+      return res.status(200).json({
+        success: true,
+        data: {
+          sent: true,
+          simulated: true,
+          message: 'Fayl Telegram testing bot rejimida yuborildi (simulated)!'
+        }
+      });
     } catch (err) {
       next(err);
     }

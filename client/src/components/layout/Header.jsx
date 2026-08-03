@@ -1,6 +1,7 @@
 /**
  * Top Header Navigation Bar (MZ-CLOUD)
  * Responsive aesthetic with Spotlight Search, Language Switcher, Theme Selector, and Mobile Drawer Button
+ * Displays current Telegram Profile Avatar Photo
  * Uses react-icons/fi (Feather icons), zero demo buttons
  */
 import React from 'react';
@@ -29,6 +30,7 @@ export default function Header() {
   const [theme, setTheme] = React.useState(() => {
     return localStorage.getItem('tgcloud_theme') || 'telegram';
   });
+  const [avatarError, setAvatarError] = React.useState(false);
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -54,8 +56,10 @@ export default function Header() {
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   };
 
+  const avatarUrl = user?.profilePhoto || window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url;
+
   return (
-    <header className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-white/10 bg-[#1e2329]/90 backdrop-blur-md shadow-lg transition-colors duration-200 z-20">
+    <header className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-white/10 bg-[#1e2329]/90 backdrop-blur-md shadow-lg transition-colors duration-200 z-20 font-sans">
       {/* Left: Mobile Drawer Button, Brand Icon & Title */}
       <div className="flex items-center space-x-3 overflow-hidden">
         {/* Mobile menu button */}
@@ -164,12 +168,21 @@ export default function Header() {
           </div>
         </div>
 
-        {/* User Profile Badge */}
+        {/* User Profile Badge with Telegram Avatar */}
         {user && (
-          <div className="flex items-center space-x-2 pl-2 border-l border-white/10">
-            <div className="w-8 h-8 rounded-full bg-[#2481cc] text-white font-bold flex items-center justify-center text-sm shadow-sm">
-              {user.firstName ? user.firstName.charAt(0).toUpperCase() : 'T'}
-            </div>
+          <div className="flex items-center space-x-2.5 pl-3 border-l border-white/10">
+            {avatarUrl && !avatarError ? (
+              <img
+                src={avatarUrl}
+                alt={user.firstName}
+                className="w-8 h-8 rounded-full object-cover border border-[#2481cc]/60 shadow-sm"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-[#2481cc] text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                {user.firstName ? user.firstName.charAt(0).toUpperCase() : 'T'}
+              </div>
+            )}
             <div className="hidden md:block text-xs">
               <div className="font-semibold text-white flex items-center space-x-1">
                 <span>{user.firstName}</span>

@@ -1,6 +1,7 @@
 /**
  * API Client (Axios) - MZ-CLOUD Production Quality
  * Automatically connects to https://mz-cloud.onrender.com/api/v1 when running on vercel.app
+ * Provides helper URLs with query parameter auth for live Telegram CDN thumbnail and stream/download endpoints
  */
 import axios from 'axios';
 
@@ -73,5 +74,36 @@ api.interceptors.response.use(
     return Promise.reject(error.response?.data?.error || error);
   }
 );
+
+/**
+ * Returns full backend URL for streaming a file's Telegram CDN thumbnail
+ * Includes query parameter auth so browser <img> tags work without custom HTTP headers
+ */
+export const getFileThumbnailUrl = (fileId) => {
+  if (!fileId) return '';
+  const token = localStorage.getItem('tgcloud_token') || '';
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '';
+  const params = new URLSearchParams();
+  if (token) params.set('token', token);
+  if (tgUser) params.set('tgId', tgUser);
+  const queryStr = params.toString();
+  return `${getBaseUrl()}/files/${fileId}/thumbnail${queryStr ? '?' + queryStr : ''}`;
+};
+
+/**
+ * Returns full backend URL for streaming/downloading the real file from Telegram CDN
+ * Includes query parameter auth so <video>, <audio>, and <a> download links work without custom HTTP headers
+ */
+export const getFileDownloadUrl = (fileId, download = false) => {
+  if (!fileId) return '';
+  const token = localStorage.getItem('tgcloud_token') || '';
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '';
+  const params = new URLSearchParams();
+  if (token) params.set('token', token);
+  if (tgUser) params.set('tgId', tgUser);
+  if (download) params.set('download', 'true');
+  const queryStr = params.toString();
+  return `${getBaseUrl()}/files/${fileId}/download${queryStr ? '?' + queryStr : ''}`;
+};
 
 export default api;

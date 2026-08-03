@@ -1,6 +1,7 @@
 /**
- * Versioned API Router - /api/v1
+ * Versioned API Router - /api/v1 (MZ-CLOUD)
  * Complete RESTful routes for Telegram Cloud Storage Platform
+ * Includes "Send by Telegram" endpoint (/files/:id/send-to-telegram)
  */
 const express = require('express');
 const authController = require('../controllers/auth.controller');
@@ -51,6 +52,9 @@ router.post('/files/parallel-upload', authMiddleware, validateRequest(bulkCreate
 router.delete('/files/recycle-bin/empty', authMiddleware, fileController.emptyRecycleBin);
 router.get('/files/:id', authMiddleware, fileController.getFileById);
 router.get('/files/:id/thumbnail', authMiddleware, fileController.getThumbnail);
+router.get('/files/:id/download', authMiddleware, fileController.getDownload);
+router.get('/files/:id/stream', authMiddleware, fileController.getDownload);
+router.post('/files/:id/send-to-telegram', authMiddleware, fileController.sendToTelegram);
 router.patch('/files/:id', authMiddleware, validateRequest(updateFileSchema), fileController.updateFile);
 router.post('/files/:id/move', authMiddleware, fileController.moveFile);
 router.post('/files/:id/share', authMiddleware, fileController.shareFile);

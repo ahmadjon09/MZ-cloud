@@ -2,6 +2,7 @@
  * Code & Document Modal Viewer (MZ-CLOUD)
  * Syntax-highlighted code viewer and Markdown document preview
  * Uses react-icons/fi
+ * Includes "Send to my Telegram" button
  */
 import React from 'react';
 import {
@@ -9,12 +10,15 @@ import {
   FiCopy,
   FiCheck,
   FiFileText,
-  FiCode
+  FiCode,
+  FiSend
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
+import { useSendToTelegram } from '../../hooks/useFiles';
 
 export default function CodeDocumentModal() {
   const { activeNoteModalFile: file, closeNoteEditor } = useUIStore();
+  const sendToTg = useSendToTelegram();
   const [copied, setCopied] = React.useState(false);
 
   if (!file) return null;
@@ -63,7 +67,7 @@ ${file.userNotes || 'No private notes added yet.'}
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
       <div
         className="w-full max-w-3xl bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
@@ -87,6 +91,14 @@ ${file.userNotes || 'No private notes added yet.'}
           </div>
 
           <div className="flex items-center space-x-2">
+            <button
+              onClick={() => sendToTg.mutate(file.id)}
+              disabled={sendToTg.isPending}
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#2481cc] text-white hover:bg-[#2f88d2] transition-colors shadow-sm disabled:opacity-50"
+            >
+              <FiSend className="w-3.5 h-3.5" />
+              <span>{sendToTg.isPending ? 'Yuborilmoqda...' : 'Telegramga Yuborish'}</span>
+            </button>
             <button
               onClick={handleCopy}
               className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#2481cc]/10 text-[#2481cc] hover:bg-[#2481cc] hover:text-white transition-colors"

@@ -1,5 +1,5 @@
 /**
- * Telegram Bot Manager (Production Quality, Fast, No Custom Emojis)
+ * Telegram Bot Manager (Production Quality, Fast, No Custom Emojis - MZ-CLOUD)
  */
 const { Telegraf } = require('telegraf');
 const appConfig = require('../config/app.config');
@@ -10,6 +10,7 @@ const { handleLangCommand } = require('./commands/lang.command');
 const { handleIncomingMedia } = require('./handlers/file.handler');
 const { handleCallbackQuery } = require('./handlers/callback.handler');
 const { handleIncomingText } = require('./handlers/text.handler');
+const { handleInlineQuery } = require('./handlers/inline.handler');
 
 class TelegramBotManager {
   constructor() {
@@ -44,6 +45,9 @@ class TelegramBotManager {
 
       // Media Handlers
       this.bot.on(['document', 'photo', 'video', 'audio', 'voice', 'video_note'], handleIncomingMedia);
+
+      // Inline Search Mode Handler (@MZCloudBot <query>)
+      this.bot.on('inline_query', handleInlineQuery);
 
       // Text Message Handler (Notes Reply & Search)
       this.bot.on('text', handleIncomingText);
