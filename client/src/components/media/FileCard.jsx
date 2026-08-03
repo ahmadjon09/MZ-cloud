@@ -1,9 +1,10 @@
 /**
- * Telegram File Item Card (react-icons/fi Only)
+ * Telegram File Item Card (react-icons/fi Only - 100% i18n)
  * Glassmorphic card for Photos, Videos, Documents, Audio, Voice, and Code
- * Directly renders real Telegram CDN photo thumbnails
+ * Directly renders real Telegram CDN photo thumbnails and autoPlaying looping video previews
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FiImage,
   FiVideo,
@@ -17,11 +18,14 @@ import {
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useAudioPlayerStore } from '../../store/useAudioPlayerStore';
+import { getFileThumbnailUrl, getFileDownloadUrl } from '../../services/api';
 
 export default function FileCard({ file, onContextMenu, allFiles = [] }) {
+  const { t } = useTranslation();
   const { openImageGallery, openVideoPlayer, openNoteEditor } = useUIStore();
   const { playTrack } = useAudioPlayerStore();
   const [imgError, setImgError] = React.useState(false);
+  const [vidError, setVidError] = React.useState(false);
 
   const getCategoryIcon = (category) => {
     switch (category) {
@@ -65,6 +69,9 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
     }
   }, [file.tags]);
 
+  const photoUrl = getFileThumbnailUrl(file.id);
+  const videoPreviewUrl = getFileDownloadUrl(file.id);
+
   return (
     <div
       onClick={handleCardClick}
@@ -72,7 +79,7 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
         e.preventDefault();
         onContextMenu(e, file);
       }}
-      className="group relative bg-[#1e2329]/90 border border-white/10 rounded-2xl p-3 shadow-sm hover:shadow-xl hover:border-[#2481cc]/60 transition-all duration-200 cursor-pointer flex flex-col justify-between backdrop-blur-md"
+      className="group relative bg-[#1e2329]/90 border border-white/10 rounded-2xl p-3 shadow-sm hover:shadow-xl hover:border-[#2481cc]/60 transition-all duration-200 cursor-pointer flex flex-col justify-between backdrop-blur-md font-sans"
     >
       {/* Top badges: Favorite */}
       <div className="absolute top-3 right-3 flex items-center space-x-1 z-10">
@@ -83,11 +90,11 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
         )}
       </div>
 
-      {/* Media Thumbnail / Preview Box */}
+      {/* Media Thumbnail / Direct Live Preview Box */}
       <div className="w-full h-32 rounded-xl bg-[#17212b]/80 flex items-center justify-center overflow-hidden mb-3 relative group-hover:scale-[1.02] transition-transform">
         {file.category === 'PHOTO' && !imgError ? (
           <img
-            src={`/api/v1/files/${file.id}/thumbnail`}
+            src={photoUrl}
             alt={file.fileName}
             className="w-full h-full object-cover transition-transform duration-200"
             onError={() => setImgError(true)}
@@ -97,6 +104,23 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
             <FiImage className="w-10 h-10 mb-1 opacity-80" />
             <span className="text-[10px] uppercase font-semibold text-slate-400">{file.extension}</span>
           </div>
+        ) : file.category === 'VIDEO' && !vidError ? (
+          <>
+            <video
+              src={videoPreviewUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover transition-transform duration-200"
+              onError={() => setVidError(true)}
+            />
+            {file.duration && (
+              <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-white font-mono text-[10px]">
+                {file.duration}s
+              </span>
+            )}
+          </>
         ) : file.category === 'VIDEO' ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-red-500/10 to-amber-500/10 text-red-500 font-medium text-xs">
             <FiVideo className="w-10 h-10 mb-1 opacity-80" />
@@ -107,7 +131,7 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
         ) : file.category === 'AUDIO' ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 text-emerald-500 font-medium text-xs">
             <FiMusic className="w-10 h-10 mb-1 opacity-80" />
-            <span className="text-[10px] uppercase font-semibold text-slate-400">Audio Track</span>
+            <span className="text-[10px] uppercase font-semibold text-slate-400">{t('media.audioTrack')}</span>
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-slate-400 font-medium text-xs">

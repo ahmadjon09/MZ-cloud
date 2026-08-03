@@ -1,8 +1,10 @@
 /**
  * Persistent Bottom Audio Player Bar (Responsive & Vector Icons Only - react-icons/fi)
  * Telegram-native audio player with playback speed, repeat, shuffle, and waveform
+ * Uses getFileDownloadUrl to stream live Telegram CDN audio with Range headers
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FiPlay,
   FiPause,
@@ -17,8 +19,10 @@ import {
   FiMusic
 } from 'react-icons/fi';
 import { useAudioPlayerStore } from '../../store/useAudioPlayerStore';
+import { getFileDownloadUrl } from '../../services/api';
 
 export default function AudioBar() {
+  const { t } = useTranslation();
   const {
     currentTrack,
     isPlaying,
@@ -89,10 +93,10 @@ export default function AudioBar() {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  const audioSrc = currentTrack.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+  const audioSrc = currentTrack.url || getFileDownloadUrl(currentTrack.id);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#1e2329]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-6 flex items-center justify-between shadow-2xl z-40">
+    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#1e2329]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-6 flex items-center justify-between shadow-2xl z-40 font-sans">
       <audio
         ref={audioRef}
         src={audioSrc}
@@ -114,7 +118,7 @@ export default function AudioBar() {
         </div>
         <div className="truncate">
           <div className="font-semibold text-xs sm:text-sm text-white truncate">
-            {currentTrack.fileName || 'Audio Track'}
+            {currentTrack.fileName || t('media.audioTrack')}
           </div>
           <div className="text-[10px] sm:text-xs text-slate-400 truncate">
             {currentTrack.caption || 'MZ-CLOUD Music'}

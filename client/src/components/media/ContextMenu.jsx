@@ -1,10 +1,11 @@
 /**
  * Telegram Context Menu (Right-Click Menu) - MZ-CLOUD
  * Provides native desktop menu actions for any Saved Message / File item
- * Includes "✈️ Send to my Telegram" button
- * Uses react-icons/fi
+ * Includes "Send to my Telegram" button
+ * Uses react-icons/fi & 100% i18n
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FiEye,
   FiStar,
@@ -27,6 +28,7 @@ import {
 import { useUIStore } from '../../store/useUIStore';
 
 export default function ContextMenu({ file, position, onClose }) {
+  const { t } = useTranslation();
   const updateFile = useUpdateFile();
   const shareFile = useShareFile();
   const sendToTg = useSendToTelegram();
@@ -91,7 +93,7 @@ export default function ContextMenu({ file, position, onClose }) {
         className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
       >
         <FiEye className="w-4 h-4" />
-        <span>Open / Preview</span>
+        <span>{t('actions.openPreview')}</span>
       </button>
 
       {!isTrash && (
@@ -101,7 +103,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
           >
             <FiSend className="w-4 h-4 text-[#2481cc] group-hover:text-white" />
-            <span>Telegram chatingizga yuborish</span>
+            <span>{t('actions.sendToTelegram')}</span>
           </button>
 
           <button
@@ -109,7 +111,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
           >
             <FiStar className="w-4 h-4" />
-            <span>{file.isFavorite ? 'Unfavorite' : 'Favorite'}</span>
+            <span>{file.isFavorite ? t('actions.unfavorite') : t('actions.favorite')}</span>
           </button>
 
           <button
@@ -117,7 +119,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
           >
             <FiFileText className="w-4 h-4" />
-            <span>Private Notes</span>
+            <span>{t('actions.editNotes')}</span>
           </button>
 
           <button
@@ -125,7 +127,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
           >
             <FiTag className="w-4 h-4" />
-            <span>Manage Tags</span>
+            <span>{t('actions.editTags')}</span>
           </button>
 
           <button
@@ -133,7 +135,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 hover:bg-[#2481cc] hover:text-white transition-colors text-left"
           >
             <FiShare2 className="w-4 h-4" />
-            <span>Share Public Link</span>
+            <span>{t('actions.share')}</span>
           </button>
 
           <div className="my-1 border-t border-white/10" />
@@ -143,7 +145,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-left"
           >
             <FiTrash2 className="w-4 h-4" />
-            <span>Move to Recycle Bin</span>
+            <span>{t('actions.delete')}</span>
           </button>
         </>
       )}
@@ -155,12 +157,12 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors text-left"
           >
             <FiRotateCcw className="w-4 h-4" />
-            <span>Restore File</span>
+            <span>{t('actions.restore')}</span>
           </button>
 
           <button
             onClick={() => {
-              if (window.confirm('Delete this file permanently?')) {
+              if (window.confirm(t('actions.permanentDelete'))) {
                 permDeleteFile.mutate(file.id);
               }
               onClose();
@@ -168,7 +170,7 @@ export default function ContextMenu({ file, position, onClose }) {
             className="w-full flex items-center space-x-2.5 px-3 py-2 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-left"
           >
             <FiXCircle className="w-4 h-4" />
-            <span>Delete Permanently</span>
+            <span>{t('actions.permanentDelete')}</span>
           </button>
         </>
       )}

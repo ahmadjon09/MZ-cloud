@@ -1,5 +1,5 @@
 /**
- * MZ-CLOUD Custom Premium Membership Modal (Telegram Stars XTR)
+ * MZ-CLOUD Custom Premium Membership Modal (Telegram Stars XTR) - 100% i18n
  * Unlock 100% ad-free cloud storage, VIP golden star badge, and priority worker queues
  * Uses react-icons/fi
  */
@@ -45,10 +45,10 @@ export default function PremiumModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white flex items-center space-x-1.5">
-                <span>MZ-CLOUD Premium</span>
+                <span>{t('premium.title')}</span>
               </h3>
               <span className="text-xs text-amber-400 font-medium">
-                Telegram Stars (XTR) orqali faollashtiring
+                {t('premium.subtitle')}
               </span>
             </div>
           </div>
@@ -66,24 +66,24 @@ export default function PremiumModal({ isOpen, onClose }) {
           <div className="flex items-start space-x-3 p-3 rounded-xl bg-white/5 border border-white/5">
             <FiShield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-white block mb-0.5">100% Reklamasiz Interfeys (0 Ads)</span>
-              <span className="text-slate-400">Homiylik bannerlari va barcha reklama oynalari butunlay o'chiriladi.</span>
+              <span className="font-bold text-white block mb-0.5">{t('premium.benefit1Title')}</span>
+              <span className="text-slate-400">{t('premium.benefit1Desc')}</span>
             </div>
           </div>
 
           <div className="flex items-start space-x-3 p-3 rounded-xl bg-white/5 border border-white/5">
             <FiAward className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-white block mb-0.5">VIP Oltin Yulduz Yorlig'i</span>
-              <span className="text-slate-400">Ismingiz yonida maxsus MZ-CLOUD Premium oltin yulduz statusi ko'rinadi.</span>
+              <span className="font-bold text-white block mb-0.5">{t('premium.benefit2Title')}</span>
+              <span className="text-slate-400">{t('premium.benefit2Desc')}</span>
             </div>
           </div>
 
           <div className="flex items-start space-x-3 p-3 rounded-xl bg-white/5 border border-white/5">
             <FiZap className="w-5 h-5 text-[#2481cc] flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-white block mb-0.5">Parallel Upload Ustuvorligi</span>
-              <span className="text-slate-400">Fayllaringiz tezkor Worker Pool navbatida eng birinchi yozilib indekslanadi.</span>
+              <span className="font-bold text-white block mb-0.5">{t('premium.benefit3Title')}</span>
+              <span className="text-slate-400">{t('premium.benefit3Desc')}</span>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function PremiumModal({ isOpen, onClose }) {
           {user?.isPremium ? (
             <div className="w-full py-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-semibold text-xs rounded-xl flex items-center justify-center space-x-2">
               <FiCheck className="w-4 h-4" />
-              <span>Siz allaqachon MZ-CLOUD Premium a'zosisiz</span>
+              <span>{t('premium.alreadyPremium')}</span>
             </div>
           ) : (
             <button
@@ -102,7 +102,7 @@ export default function PremiumModal({ isOpen, onClose }) {
               className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-lg transition-all disabled:opacity-50"
             >
               <FiStar className="w-4 h-4 fill-white" />
-              <span>{starsInvoiceMutation.isPending ? 'Hisob yuborilmoqda...' : '50 Telegram Stars orqali faollashtirish'}</span>
+              <span>{starsInvoiceMutation.isPending ? t('actions.sending') : t('premium.payStars')}</span>
             </button>
           )}
 
@@ -114,7 +114,7 @@ export default function PremiumModal({ isOpen, onClose }) {
               }}
               className="w-full py-2 bg-white/10 hover:bg-white/15 text-slate-300 font-medium text-[11px] rounded-xl transition-colors"
             >
-              [Dev mode] MZ-CLOUD Premium statusini yangilash
+              {t('premium.devToggle')}
             </button>
           )}
         </div>

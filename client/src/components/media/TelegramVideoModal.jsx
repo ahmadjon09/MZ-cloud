@@ -1,8 +1,8 @@
 /**
- * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi & Full i18n)
+ * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi & 100% i18n)
+ * Glassmorphic Telegram Desktop aesthetic
  * Supports Playback Speed (0.5x to 2x), Picture-in-Picture, position memory, and keyboard controls
  * Includes "Send to my Telegram" button
- * Uses getFileDownloadUrl with query auth parameter
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +15,8 @@ import {
   FiVolumeX,
   FiRotateCcw,
   FiRotateCw,
-  FiSend
+  FiSend,
+  FiVideo
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useSendToTelegram } from '../../hooks/useFiles';
@@ -129,11 +130,11 @@ export default function TelegramVideoModal() {
     getFileDownloadUrl(activeVideoModalFile.id);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200 font-sans">
+    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between animate-in fade-in duration-200 font-sans">
       {/* Top Header */}
-      <div className="h-16 px-6 flex items-center justify-between text-white bg-gradient-to-b from-black/70 to-transparent z-10">
+      <div className="h-16 px-6 flex items-center justify-between text-white bg-gradient-to-b from-[#17212b]/90 to-transparent border-b border-white/10 z-10">
         <div className="truncate">
-          <h3 className="font-semibold text-sm truncate max-w-md">
+          <h3 className="font-semibold text-sm truncate max-w-md text-white">
             {activeVideoModalFile.fileName}
           </h3>
           <span className="text-xs text-slate-400">
@@ -172,12 +173,12 @@ export default function TelegramVideoModal() {
             onPause={() => setIsPlaying(false)}
             onError={() => setVidError(true)}
             onClick={togglePlayPause}
-            className="max-h-[75vh] max-w-[90vw] rounded-xl shadow-2xl cursor-pointer"
+            className="max-h-[75vh] max-w-[90vw] rounded-2xl shadow-2xl border border-white/10 cursor-pointer bg-black/40"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 bg-[#1e2329] rounded-2xl border border-white/10 text-center max-w-md">
-            <div className="w-16 h-16 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center mb-4 text-2xl font-bold">
-              VIDEO
+          <div className="flex flex-col items-center justify-center p-12 bg-[#1e2329]/90 rounded-2xl border border-white/10 text-center max-w-md backdrop-blur-md">
+            <div className="w-16 h-16 rounded-2xl bg-[#2481cc]/20 text-[#2481cc] flex items-center justify-center mb-4 text-2xl font-bold border border-[#2481cc]/30">
+              <FiVideo className="w-8 h-8" />
             </div>
             <h4 className="text-white font-semibold text-sm mb-1">{activeVideoModalFile.fileName}</h4>
             <p className="text-xs text-slate-400 mb-4">
@@ -195,10 +196,10 @@ export default function TelegramVideoModal() {
       </div>
 
       {/* Bottom Control Bar */}
-      <div className="h-20 px-8 flex flex-col justify-center text-white bg-gradient-to-t from-black/80 to-transparent z-10 space-y-2">
+      <div className="h-20 px-8 flex flex-col justify-center text-white bg-gradient-to-t from-[#17212b]/95 to-transparent border-t border-white/10 z-10 space-y-2">
         {/* Seek Bar */}
         <div className="w-full flex items-center space-x-3">
-          <span className="text-xs text-slate-400 w-10 text-right">
+          <span className="text-xs text-slate-400 w-10 text-right font-mono">
             {formatTime(currentTime)}
           </span>
           <input
@@ -209,7 +210,7 @@ export default function TelegramVideoModal() {
             onChange={handleSeek}
             className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#2481cc]"
           />
-          <span className="text-xs text-slate-400 w-10">
+          <span className="text-xs text-slate-400 w-10 font-mono">
             {formatTime(duration)}
           </span>
         </div>
@@ -219,7 +220,7 @@ export default function TelegramVideoModal() {
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlayPause}
-              className="p-2 rounded-full bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-transform active:scale-95"
+              className="p-2 rounded-full bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-transform active:scale-95 shadow-md"
             >
               {isPlaying ? <FiPause className="w-5 h-5" /> : <FiPlay className="w-5 h-5 ml-0.5" />}
             </button>
@@ -230,7 +231,7 @@ export default function TelegramVideoModal() {
                   videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
                 }
               }}
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-white transition-colors"
               title="-10 seconds"
             >
               <FiRotateCcw className="w-4 h-4" />
@@ -241,7 +242,7 @@ export default function TelegramVideoModal() {
                   videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
                 }
               }}
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-white transition-colors"
               title="+10 seconds"
             >
               <FiRotateCw className="w-4 h-4" />
@@ -251,7 +252,7 @@ export default function TelegramVideoModal() {
           <div className="flex items-center space-x-4">
             <button
               onClick={cycleSpeed}
-              className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-300 hover:bg-[#2481cc] hover:text-white transition-colors"
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-[#2481cc] hover:text-white transition-colors border border-white/5"
             >
               {playbackRate}x
             </button>

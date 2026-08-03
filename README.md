@@ -29,9 +29,10 @@ Unlike traditional storage platforms that require massive server hard drive arra
 - Automatically assigns `SUPER_ADMIN` role to the user matching `ADMIN_TELEGRAM_ID`.
 - **100% Full-Screen Desktop & Mobile Viewport:** Uses `h-full w-full min-h-screen flex flex-col` so that whether opened on Telegram Desktop or Telegram Mobile, the app fills the entire screen height without gaps or scroll breaks.
 
-### 2. 🎬 HTTP Range-Supported Telegram CDN Media Streaming
+### 2. 🎬 HTTP Range-Supported Telegram CDN Media Streaming (No Default Media)
 - **Native Video & Audio Seeking:** `/api/v1/files/:id/stream` and `/preview` automatically forward HTTP Range headers (`Range: bytes=0-`) to Telegram CDN and respond with **HTTP 206 Partial Content**, `Content-Range`, and `Accept-Ranges: bytes`.
 - **Zero Default / Fallback Audio or Video:** All default audio/video fallbacks have been removed. Media tags stream the real Telegram CDN file.
+- **Live Autoplay Card Previews:** Photos and Videos preview directly inside their Glassmorphic cards (`<video autoPlay muted loop playsInline />`).
 
 ### 3. ✈️ "Send by Telegram" (Forward directly to your chat)
 - Click **"✈️ Telegram chatingizga yuborish / Send to my Telegram"** on any file card, gallery viewer, or shared page to instantly have `@MZCloudBot` send the original Telegram CDN file directly to your personal Telegram chat.
@@ -39,8 +40,10 @@ Unlike traditional storage platforms that require massive server hard drive arra
 ### 4. 🔍 Telegram Inline Search Mode (`@MZCloudBot <query>`)
 - Users can type `@MZCloudBot <query>` inside **any Telegram chat, group, or channel** to instantly search all of their personal cloud files and send an interactive file card to their friends.
 
-### 5. ⭐ Zero Ads for Telegram Premium Users
-- Users with **Telegram Premium (`user.isPremium === true`)** enjoy a 100% ad-free experience. Non-premium users see a non-intrusive sponsorship banner.
+### 5. ⭐ MZ-CLOUD Custom Premium Membership (Telegram Stars XTR)
+- Activated via **Telegram Stars (`currency: 'XTR'`, `amount: 50`)** inside Telegram or via `<PremiumModal />` in the WebApp.
+- **100% Ad-Free Experience (0 Ads):** Promotional banners are completely hidden for Premium users.
+- **VIP Golden Star Badge:** Displays a glowing star next to your name.
 
 ### 6. 📱 100% Mobile Responsive across All Modals & Feather Vector Icons (`react-icons/fi`)
 - Built with crisp **Feather Icons (`react-icons/fi`)** across the entire UI (no unicode text emojis in frontend).
@@ -98,7 +101,7 @@ Unlike traditional storage platforms that require massive server hard drive arra
 │   │   ├── i18n/           # English, Russian, Uzbek dictionaries
 │   │   ├── pages/          # DashboardPage, AdminPage (/admin), SharedFilePage (/share/:token)
 │   │   ├── services/       # Axios API client & Socket.IO client
-│   │   └── store/          # Zustand stores (Auth, UI, AudioPlayer, UploadQueue)
+│   │   └── store/          # Zustand stores (Auth, UI, AudioPlayer, UploadQueue - 2s toast timeout)
 │   └── vite.config.js
 ├── ecosystem.config.js     # PM2 Cluster manager configuration
 └── package.json            # Root scripts

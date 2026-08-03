@@ -1,6 +1,7 @@
 /**
  * Internationalization (i18next) - English, Russian, and Uzbek
  * Complete Translations for MZ-CLOUD Platform (Vector icons only, no text emojis)
+ * 100% coverage across ContextMenu, PremiumModal, AudioBar, VideoPlayer, and FileCard
  */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -61,7 +62,21 @@ const resources = {
         cancel: 'Cancel',
         confirm: 'Confirm',
         sendToTelegram: 'Send to my Telegram',
-        sending: 'Sending...'
+        sending: 'Sending...',
+        openPreview: 'Open / Preview'
+      },
+      premium: {
+        title: 'MZ-CLOUD Premium',
+        subtitle: 'Activate via Telegram Stars (XTR)',
+        benefit1Title: '100% Ad-Free Experience (0 Ads)',
+        benefit1Desc: 'Sponsorship banners and all promotional overlays are permanently removed.',
+        benefit2Title: 'VIP Golden Star Badge',
+        benefit2Desc: 'A special MZ-CLOUD Premium golden star icon is displayed next to your name.',
+        benefit3Title: 'Parallel Upload Priority',
+        benefit3Desc: 'Your files are queued and indexed first in our high-speed Worker Pools.',
+        alreadyPremium: 'You are already an MZ-CLOUD Premium member',
+        payStars: 'Activate for 50 Telegram Stars',
+        devToggle: '[Dev mode] Toggle MZ-CLOUD Premium status'
       },
       files: {
         emptyTitle: 'Your MZ-CLOUD is Empty',
@@ -76,7 +91,9 @@ const resources = {
       },
       media: {
         videoPlayerSub: 'MZ-CLOUD Telegram CDN Player — Position Auto-Remembered',
-        cdnStreamTip: 'This media is stored safely inside Telegram CDN. Click below to forward the original file directly to your Telegram chat:'
+        cdnStreamTip: 'This media is stored safely inside Telegram CDN. Click below to forward the original file directly to your Telegram chat:',
+        videoLoading: 'Loading video from Telegram CDN...',
+        audioTrack: 'Audio Track'
       },
       admin: {
         title: 'Super Admin Control Panel',
@@ -166,7 +183,21 @@ const resources = {
         cancel: 'Отмена',
         confirm: 'Подтвердить',
         sendToTelegram: 'Отправить в Telegram чат',
-        sending: 'Отправка...'
+        sending: 'Отправка...',
+        openPreview: 'Открыть / Просмотр'
+      },
+      premium: {
+        title: 'MZ-CLOUD Premium',
+        subtitle: 'Активация через Telegram Stars (XTR)',
+        benefit1Title: '100% Без рекламы (0 Ads)',
+        benefit1Desc: 'Спонсорские баннеры и рекламные блоки полностью отключаются.',
+        benefit2Title: 'VIP Золотая Звезда',
+        benefit2Desc: 'Рядом с вашим именем отображается золотая звезда MZ-CLOUD Premium.',
+        benefit3Title: 'Приоритет в очереди',
+        benefit3Desc: 'Ваши файлы обрабатываются и индексируются первыми в Worker Pool.',
+        alreadyPremium: 'Вы уже участник MZ-CLOUD Premium',
+        payStars: 'Активировать за 50 Telegram Stars',
+        devToggle: '[Dev mode] Изменить статус MZ-CLOUD Premium'
       },
       files: {
         emptyTitle: 'Ваше облако MZ-CLOUD пока пусто',
@@ -181,7 +212,9 @@ const resources = {
       },
       media: {
         videoPlayerSub: 'Плеер MZ-CLOUD — Позиция сохраняется автоматически',
-        cdnStreamTip: 'Файл хранится в Telegram CDN. Нажмите кнопку ниже, чтобы переслать оригинал в ваш чат:'
+        cdnStreamTip: 'Файл хранится в Telegram CDN. Нажмите кнопку ниже, чтобы переслать оригинал в ваш чат:',
+        videoLoading: 'Загрузка видео из Telegram CDN...',
+        audioTrack: 'Аудио трек'
       },
       admin: {
         title: 'Панель управления Супер-Админа',
@@ -271,7 +304,21 @@ const resources = {
         cancel: 'Bekor qilish',
         confirm: 'Tasdiqlash',
         sendToTelegram: 'Telegram chatingizga yuborish',
-        sending: 'Yuborilmoqda...'
+        sending: 'Yuborilmoqda...',
+        openPreview: 'Ochish / Ko\'rish'
+      },
+      premium: {
+        title: 'MZ-CLOUD Premium',
+        subtitle: 'Telegram Stars (XTR) orqali faollashtiring',
+        benefit1Title: '100% Reklamasiz Interfeys (0 Ads)',
+        benefit1Desc: 'Homiylik bannerlari va barcha reklama oynalari butunlay o\'chiriladi.',
+        benefit2Title: 'VIP Oltin Yulduz Yorlig\'i',
+        benefit2Desc: 'Ismingiz yonida maxsus MZ-CLOUD Premium oltin yulduz statusi ko\'rinadi.',
+        benefit3Title: 'Parallel Upload Ustuvorligi',
+        benefit3Desc: 'Fayllaringiz tezkor Worker Pool navbatida eng birinchi yozilib indekslanadi.',
+        alreadyPremium: 'Siz allaqachon MZ-CLOUD Premium a\'zosisiz',
+        payStars: '50 Telegram Stars orqali faollashtirish',
+        devToggle: '[Dev mode] MZ-CLOUD Premium statusini yangilash'
       },
       files: {
         emptyTitle: 'Sizning MZ-CLOUD bulutingiz hozircha bo‘sh',
@@ -286,7 +333,9 @@ const resources = {
       },
       media: {
         videoPlayerSub: 'MZ-CLOUD Telegram CDN Pleyer — Ko\'rilgan vaqt avtomatik saqlanadi',
-        cdnStreamTip: 'Ushbu media Telegram CDN da saqlanmoqda. Original faylni o\'z chatingizga yuborish uchun quyidagi tugmani bosing:'
+        cdnStreamTip: 'Ushbu media Telegram CDN da saqlanmoqda. Original faylni o\'z chatingizga yuborish uchun quyidagi tugmani bosing:',
+        videoLoading: 'Telegram CDN\'dan video yuklanmoqda...',
+        audioTrack: 'Audio Trek'
       },
       admin: {
         title: 'Super Admin Boshqaruv Paneli',
