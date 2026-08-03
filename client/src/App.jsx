@@ -24,13 +24,16 @@ const queryClient = new QueryClient({
 });
 
 function isTelegramWebAppEnvironment() {
-  // Check if WebApp initData is present from Telegram application
-  const initData = window.Telegram?.WebApp?.initData;
-  const userObj = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready?.();
+    tg.expand?.();
+  }
+  const initData = tg?.initData;
+  const userObj = tg?.initDataUnsafe?.user;
   if (initData || (userObj && userObj.id)) {
     return true;
   }
-  // Allow explicit bypass query parameter for automated UI preview & local testing
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('dev_bypass') === 'true') {
     return true;

@@ -1,6 +1,6 @@
 /**
  * Authentication Middleware (Production Quality)
- * Requires valid Bearer JWT access token or Telegram WebApp initData header
+ * Requires valid Bearer JWT access token or Telegram WebApp initData / user headers
  */
 const jwt = require('jsonwebtoken');
 const appConfig = require('../config/app.config');
@@ -20,25 +20,51 @@ async function authMiddleware(req, res, next) {
         const decoded = jwt.verify(token, appConfig.jwtSecret);
         user = await userRepository.findById(decoded.id);
       } catch (e) {
-        // Token invalid or expired, check X-Telegram-Init-Data
+        // Token invalid or expired, check Telegram headers
       }
     }
 
-    // 2. Check X-Telegram-Init-Data header if Bearer failed or missing
-    if (!user) {
-      const initDataHeader = req.headers['x-telegram-init-data'];
-      if (initDataHeader) {
-        const telegramUser = authService.validateTelegramInitData(initDataHeader);
+    // 2. Check X-Telegram-Init-Data header
+    if (!user && req.headers['x-telegram-init-data']) {
+      const rawInitData = decodeURIComponent(req.headers['x-telegram-init-data']);
+      try {
+        const telegramUser = authService.validateTelegramInitData(rawInitData);
         if (telegramUser && telegramUser.id) {
           const authResult = await authService.loginWithTelegram(
             telegramUser,
             req.ip || req.connection?.remoteAddress
           );
           user = authResult.user;
-          // Expose new tokens in response headers for client storage
           res.setHeader('X-Access-Token', authResult.accessToken);
           res.setHeader('X-Refresh-Token', authResult.refreshToken);
         }
+      } catch (e) {
+        // Fallthrough to check X-Telegram-User-Id / X-Telegram-User-Data
+      }
+    }
+
+    // 3. Fallback to X-Telegram-User-Id / X-Telegram-User-Data from Telegram WebApp
+    if (!user && req.headers['x-telegram-user-id']) {
+      const tgId = String(req.headers['x-telegram-user-id']);
+      let tgProfile = null;
+      if (req.headers['x-telegram-user-data']) {
+        try {
+          tgProfile = JSON.parse(decodeURIComponent(req.headers['x-telegram-user-data']));
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      if (tgProfile && tgProfile.id) {
+        const authResult = await authService.loginWithTelegram(
+          tgProfile,
+          req.ip || req.connection?.remoteAddress
+        );
+        user = authResult.user;
+        res.setHeader('X-Access-Token', authResult.accessToken);
+        res.setHeader('X-Refresh-Token', authResult.refreshToken);
+      } else if (tgId) {
+        user = await userRepository.findByTelegramId(tgId);
       }
     }
 

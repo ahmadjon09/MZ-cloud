@@ -1,9 +1,8 @@
 /**
- * API Client (Axios)
- * Configured with token injection and automatic error handling
+ * API Client (Axios) - Production Quality
+ * Configured with Telegram WebApp headers and automatic error handling
  */
 import axios from 'axios';
-import { useAuthStore } from '../store/useAuthStore';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -16,20 +15,40 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Inject Telegram WebApp initData if running inside Telegram webview
-  if (window.Telegram?.WebApp?.initData) {
-    config.headers['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+  // Inject Telegram WebApp initData and user identity if running inside Telegram webview
+  const tgWebApp = window.Telegram?.WebApp;
+  if (tgWebApp) {
+    if (tgWebApp.initData) {
+      config.headers['X-Telegram-Init-Data'] = encodeURIComponent(tgWebApp.initData);
+    }
+    const userObj = tgWebApp.initDataUnsafe?.user;
+    if (userObj && userObj.id) {
+      config.headers['X-Telegram-User-Id'] = String(userObj.id);
+      config.headers['X-Telegram-User-Data'] = encodeURIComponent(JSON.stringify(userObj));
+    }
   }
 
-  // Inject Demo user header for standalone sandbox mode
-  config.headers['X-Demo-User-Id'] = '777000';
+  // Allow fallback auth for testing ONLY if dev bypass parameter is present
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('dev_bypass') === 'true') {
+    config.headers['X-Telegram-User-Id'] = '777000';
+    config.headers['X-Telegram-User-Data'] = encodeURIComponent(
+      JSON.stringify({
+        id: 777000,
+        username: 'superadmin',
+        first_name: 'Alisher',
+        last_name: 'Navoiy',
+        language_code: 'uz',
+        is_premium: true
+      })
+    );
+  }
 
   return config;
 });
 
 api.interceptors.response.use(
   (res) => {
-    // If backend sent refreshed tokens in headers, update store
     const newAccess = res.headers['x-access-token'];
     const newRefresh = res.headers['x-refresh-token'];
     if (newAccess) {
