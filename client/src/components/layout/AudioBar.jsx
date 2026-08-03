@@ -1,21 +1,21 @@
 /**
- * Persistent Bottom Audio Player Bar (Responsive & Vector Icons Only)
+ * Persistent Bottom Audio Player Bar (Responsive & Vector Icons Only - react-icons/fi)
  * Telegram-native audio player with playback speed, repeat, shuffle, and waveform
  */
 import React from 'react';
 import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Repeat,
-  Shuffle,
-  Volume2,
-  VolumeX,
-  Maximize2,
-  X,
-  Music
-} from 'lucide-react';
+  FiPlay,
+  FiPause,
+  FiSkipBack,
+  FiSkipForward,
+  FiRepeat,
+  FiShuffle,
+  FiVolume2,
+  FiVolumeX,
+  FiMaximize2,
+  FiX,
+  FiMusic
+} from 'react-icons/fi';
 import { useAudioPlayerStore } from '../../store/useAudioPlayerStore';
 
 export default function AudioBar() {
@@ -92,7 +92,7 @@ export default function AudioBar() {
   const audioSrc = currentTrack.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-telegram-light-card/95 dark:bg-telegram-dark-card/95 backdrop-blur-md border-t border-telegram-light-border dark:border-telegram-dark-border px-3 sm:px-6 flex items-center justify-between shadow-2xl z-40">
+    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#1e2329]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-6 flex items-center justify-between shadow-2xl z-40">
       <audio
         ref={audioRef}
         src={audioSrc}
@@ -109,15 +109,15 @@ export default function AudioBar() {
 
       {/* Left: Track Info */}
       <div className="flex items-center space-x-3 w-40 sm:w-64 truncate">
-        <div className="w-10 h-10 rounded-lg bg-telegram-blue/20 text-telegram-blue flex items-center justify-center flex-shrink-0">
-          <Music className="w-5 h-5" />
+        <div className="w-10 h-10 rounded-lg bg-[#2481cc]/20 text-[#2481cc] flex items-center justify-center flex-shrink-0">
+          <FiMusic className="w-5 h-5" />
         </div>
         <div className="truncate">
-          <div className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">
+          <div className="font-semibold text-xs sm:text-sm text-white truncate">
             {currentTrack.fileName || 'Audio Track'}
           </div>
           <div className="text-[10px] sm:text-xs text-slate-400 truncate">
-            {currentTrack.caption || 'Telegram Cloud Music'}
+            {currentTrack.caption || 'MZ-CLOUD Music'}
           </div>
         </div>
       </div>
@@ -128,30 +128,30 @@ export default function AudioBar() {
           <button
             onClick={toggleShuffle}
             className={`hidden sm:inline-block p-1.5 rounded-full transition-colors ${
-              isShuffle ? 'text-telegram-blue bg-telegram-blue/10' : 'text-slate-400 hover:text-slate-200'
+              isShuffle ? 'text-[#2481cc] bg-[#2481cc]/10' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Shuffle className="w-4 h-4" />
+            <FiShuffle className="w-4 h-4" />
           </button>
           <button onClick={prevTrack} className="text-slate-400 hover:text-white transition-colors">
-            <SkipBack className="w-4 sm:w-5 h-4 sm:h-5" />
+            <FiSkipBack className="w-4 sm:w-5 h-4 sm:h-5" />
           </button>
           <button
             onClick={togglePlayPause}
-            className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-telegram-blue hover:bg-telegram-blue-hover text-white flex items-center justify-center shadow-md transition-transform active:scale-95"
+            className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-[#2481cc] hover:bg-[#2f88d2] text-white flex items-center justify-center shadow-md transition-transform active:scale-95"
           >
-            {isPlaying ? <Pause className="w-4 sm:w-5 h-4 sm:h-5" /> : <Play className="w-4 sm:w-5 h-4 sm:h-5 ml-0.5" />}
+            {isPlaying ? <FiPause className="w-4 sm:w-5 h-4 sm:h-5" /> : <FiPlay className="w-4 sm:w-5 h-4 sm:h-5 ml-0.5" />}
           </button>
           <button onClick={nextTrack} className="text-slate-400 hover:text-white transition-colors">
-            <SkipForward className="w-4 sm:w-5 h-4 sm:h-5" />
+            <FiSkipForward className="w-4 sm:w-5 h-4 sm:h-5" />
           </button>
           <button
             onClick={toggleRepeat}
             className={`hidden sm:inline-block p-1.5 rounded-full transition-colors ${
-              isRepeat ? 'text-telegram-blue bg-telegram-blue/10' : 'text-slate-400 hover:text-slate-200'
+              isRepeat ? 'text-[#2481cc] bg-[#2481cc]/10' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Repeat className="w-4 h-4" />
+            <FiRepeat className="w-4 h-4" />
           </button>
         </div>
 
@@ -166,7 +166,7 @@ export default function AudioBar() {
             max="100"
             value={progress}
             onChange={handleSeek}
-            className="flex-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-telegram-blue"
+            className="flex-1 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#2481cc]"
           />
           <span className="text-[10px] text-slate-400 w-7">
             {formatTime(duration)}
@@ -178,7 +178,7 @@ export default function AudioBar() {
       <div className="flex items-center space-x-1 sm:space-x-2">
         <button
           onClick={cycleSpeed}
-          className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-semibold rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-telegram-blue hover:text-white transition-colors"
+          className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-semibold rounded bg-slate-700 text-slate-300 hover:bg-[#2481cc] hover:text-white transition-colors"
         >
           {playbackRate}x
         </button>
@@ -189,17 +189,17 @@ export default function AudioBar() {
           }}
           className="hidden sm:inline-block p-1.5 text-slate-400 hover:text-slate-200"
         >
-          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {isMuted ? <FiVolumeX className="w-4 h-4" /> : <FiVolume2 className="w-4 h-4" />}
         </button>
         <button
           onClick={() => setModalOpen(true)}
           title="Open Playlist & Waveform Modal"
-          className="p-1.5 text-slate-400 hover:text-telegram-blue"
+          className="p-1.5 text-slate-400 hover:text-[#2481cc]"
         >
-          <Maximize2 className="w-4 h-4" />
+          <FiMaximize2 className="w-4 h-4" />
         </button>
         <button onClick={closePlayer} className="p-1.5 text-slate-400 hover:text-red-500">
-          <X className="w-4 h-4" />
+          <FiX className="w-4 h-4" />
         </button>
       </div>
     </div>

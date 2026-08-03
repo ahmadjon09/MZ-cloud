@@ -1,21 +1,20 @@
 /**
- * Telegram File Item Card (Vector Icons Only - Lucide React)
+ * Telegram File Item Card (react-icons/fi Only)
  * Glassmorphic card for Photos, Videos, Documents, Audio, Voice, and Code
  * Directly renders real Telegram CDN photo thumbnails
  */
 import React from 'react';
 import {
-  Image as ImageIcon,
-  Video,
-  FileText,
-  Music,
-  Mic,
-  Code,
-  Archive,
-  Star,
-  Pin,
-  File
-} from 'lucide-react';
+  FiImage,
+  FiVideo,
+  FiFileText,
+  FiMusic,
+  FiMic,
+  FiCode,
+  FiArchive,
+  FiStar,
+  FiFile
+} from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useAudioPlayerStore } from '../../store/useAudioPlayerStore';
 
@@ -26,14 +25,14 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
 
   const getCategoryIcon = (category) => {
     switch (category) {
-      case 'PHOTO': return <ImageIcon className="w-4 h-4 text-telegram-blue" />;
-      case 'VIDEO': return <Video className="w-4 h-4 text-red-500" />;
-      case 'AUDIO': return <Music className="w-4 h-4 text-emerald-500" />;
-      case 'VOICE': return <Mic className="w-4 h-4 text-amber-500" />;
-      case 'DOCUMENT': return <FileText className="w-4 h-4 text-blue-500" />;
-      case 'CODE': return <Code className="w-4 h-4 text-purple-500" />;
-      case 'ARCHIVE': return <Archive className="w-4 h-4 text-orange-500" />;
-      default: return <File className="w-4 h-4 text-slate-400" />;
+      case 'PHOTO': return <FiImage className="w-4 h-4 text-[#2481cc]" />;
+      case 'VIDEO': return <FiVideo className="w-4 h-4 text-red-500" />;
+      case 'AUDIO': return <FiMusic className="w-4 h-4 text-emerald-500" />;
+      case 'VOICE': return <FiMic className="w-4 h-4 text-amber-500" />;
+      case 'DOCUMENT': return <FiFileText className="w-4 h-4 text-blue-500" />;
+      case 'CODE': return <FiCode className="w-4 h-4 text-purple-500" />;
+      case 'ARCHIVE': return <FiArchive className="w-4 h-4 text-orange-500" />;
+      default: return <FiFile className="w-4 h-4 text-slate-400" />;
     }
   };
 
@@ -73,24 +72,19 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
         e.preventDefault();
         onContextMenu(e, file);
       }}
-      className="group relative bg-telegram-light-card dark:bg-telegram-dark-card border border-telegram-light-border dark:border-telegram-dark-border rounded-2xl p-3 shadow-sm hover:shadow-telegram-card hover:border-telegram-blue/60 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+      className="group relative bg-[#1e2329]/90 border border-white/10 rounded-2xl p-3 shadow-sm hover:shadow-xl hover:border-[#2481cc]/60 transition-all duration-200 cursor-pointer flex flex-col justify-between backdrop-blur-md"
     >
-      {/* Top badges: Favorite & Pin */}
+      {/* Top badges: Favorite */}
       <div className="absolute top-3 right-3 flex items-center space-x-1 z-10">
-        {file.isPinned && (
-          <span className="p-1 rounded-full bg-telegram-blue/10 text-telegram-blue" title="Pinned">
-            <Pin className="w-3.5 h-3.5" />
-          </span>
-        )}
         {file.isFavorite && (
           <span className="p-1 rounded-full bg-amber-500/10 text-amber-500" title="Favorite">
-            <Star className="w-3.5 h-3.5 fill-amber-500" />
+            <FiStar className="w-3.5 h-3.5 fill-amber-500" />
           </span>
         )}
       </div>
 
       {/* Media Thumbnail / Preview Box */}
-      <div className="w-full h-32 rounded-xl bg-telegram-light dark:bg-telegram-dark/60 flex items-center justify-center overflow-hidden mb-3 relative group-hover:scale-[1.02] transition-transform">
+      <div className="w-full h-32 rounded-xl bg-[#17212b]/80 flex items-center justify-center overflow-hidden mb-3 relative group-hover:scale-[1.02] transition-transform">
         {file.category === 'PHOTO' && !imgError ? (
           <img
             src={`/api/v1/files/${file.id}/thumbnail`}
@@ -99,24 +93,24 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
             onError={() => setImgError(true)}
           />
         ) : file.category === 'PHOTO' ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-telegram-blue/10 to-blue-500/10 text-telegram-blue font-medium text-xs">
-            <ImageIcon className="w-10 h-10 mb-1 opacity-80" />
-            <span className="text-[10px] uppercase font-semibold text-slate-500">{file.extension}</span>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-[#2481cc]/10 to-blue-500/10 text-[#2481cc] font-medium text-xs">
+            <FiImage className="w-10 h-10 mb-1 opacity-80" />
+            <span className="text-[10px] uppercase font-semibold text-slate-400">{file.extension}</span>
           </div>
         ) : file.category === 'VIDEO' ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-red-500/10 to-amber-500/10 text-red-500 font-medium text-xs">
-            <Video className="w-10 h-10 mb-1 opacity-80" />
-            <span className="text-[10px] uppercase font-semibold text-slate-500">
+            <FiVideo className="w-10 h-10 mb-1 opacity-80" />
+            <span className="text-[10px] uppercase font-semibold text-slate-400">
               {file.duration ? `${file.duration}s` : 'Video'}
             </span>
           </div>
         ) : file.category === 'AUDIO' ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 text-emerald-500 font-medium text-xs">
-            <Music className="w-10 h-10 mb-1 opacity-80" />
-            <span className="text-[10px] uppercase font-semibold text-slate-500">Audio Track</span>
+            <FiMusic className="w-10 h-10 mb-1 opacity-80" />
+            <span className="text-[10px] uppercase font-semibold text-slate-400">Audio Track</span>
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 font-medium text-xs">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-slate-400 font-medium text-xs">
             {getCategoryIcon(file.category)}
             <span className="text-[10px] uppercase font-semibold mt-1">{file.extension}</span>
           </div>
@@ -127,13 +121,13 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
       <div>
         <div className="flex items-center space-x-1.5 mb-1">
           {getCategoryIcon(file.category)}
-          <span className="font-semibold text-xs text-slate-800 dark:text-slate-100 truncate flex-1">
+          <span className="font-semibold text-xs text-white truncate flex-1">
             {file.fileName}
           </span>
         </div>
 
         {file.caption && (
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mb-1">
+          <p className="text-[11px] text-slate-400 line-clamp-1 mb-1">
             {file.caption}
           </p>
         )}
@@ -144,7 +138,7 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
             {tagsList.slice(0, 3).map((tag, idx) => (
               <span
                 key={idx}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-telegram-blue/10 text-telegram-blue font-medium"
+                className="text-[9px] px-1.5 py-0.5 rounded bg-[#2481cc]/10 text-[#2481cc] font-medium"
               >
                 #{tag}
               </span>
@@ -152,7 +146,7 @@ export default function FileCard({ file, onContextMenu, allFiles = [] }) {
           </div>
         )}
 
-        <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 border-t border-telegram-light-border/60 dark:border-telegram-dark-border/60 pt-1.5">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1 border-t border-white/5 pt-1.5">
           <span>{formatSize(file.fileSize)}</span>
           <span>{new Date(file.createdAt).toLocaleDateString()}</span>
         </div>

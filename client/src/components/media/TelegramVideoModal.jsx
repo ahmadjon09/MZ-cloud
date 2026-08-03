@@ -1,19 +1,18 @@
 /**
- * Telegram Video Player Modal
+ * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi)
  * Supports Playback Speed (0.5x to 2x), Picture-in-Picture, position memory, and keyboard controls
  */
 import React from 'react';
 import {
-  X,
-  Play,
-  Pause,
-  Maximize2,
-  Volume2,
-  VolumeX,
-  PictureInPicture,
-  RotateCcw,
-  RotateCw
-} from 'lucide-react';
+  FiX,
+  FiPlay,
+  FiPause,
+  FiMaximize2,
+  FiVolume2,
+  FiVolumeX,
+  FiRotateCcw,
+  FiRotateCw
+} from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 
 export default function TelegramVideoModal() {
@@ -27,7 +26,6 @@ export default function TelegramVideoModal() {
   const [duration, setDuration] = React.useState(0);
   const [isMuted, setIsMuted] = React.useState(false);
 
-  // Restore remembered playback position
   React.useEffect(() => {
     if (videoRef.current && activeVideoModalFile) {
       const savedTime = localStorage.getItem(`tgcloud_video_pos_${activeVideoModalFile.id}`);
@@ -37,7 +35,6 @@ export default function TelegramVideoModal() {
     }
   }, [activeVideoModalFile]);
 
-  // Keyboard controls
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if (!activeVideoModalFile || !videoRef.current) return;
@@ -77,7 +74,6 @@ export default function TelegramVideoModal() {
     setDuration(dur);
     setProgress((current / dur) * 100);
 
-    // Save playback position in localStorage
     localStorage.setItem(`tgcloud_video_pos_${activeVideoModalFile.id}`, current.toString());
   };
 
@@ -108,7 +104,7 @@ export default function TelegramVideoModal() {
         await document.exitPictureInPicture();
       }
     } catch (e) {
-      // PiP not supported
+      // ignore
     }
   };
 
@@ -139,7 +135,7 @@ export default function TelegramVideoModal() {
           onClick={closeVideoPlayer}
           className="p-2 text-slate-300 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
         >
-          <X className="w-6 h-6" />
+          <FiX className="w-6 h-6" />
         </button>
       </div>
 
@@ -170,7 +166,7 @@ export default function TelegramVideoModal() {
             max="100"
             value={progress}
             onChange={handleSeek}
-            className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-telegram-blue"
+            className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#2481cc]"
           />
           <span className="text-xs text-slate-400 w-10">
             {formatTime(duration)}
@@ -182,9 +178,9 @@ export default function TelegramVideoModal() {
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlayPause}
-              className="p-2 rounded-full bg-telegram-blue hover:bg-telegram-blue-hover text-white transition-transform active:scale-95"
+              className="p-2 rounded-full bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-transform active:scale-95"
             >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+              {isPlaying ? <FiPause className="w-5 h-5" /> : <FiPlay className="w-5 h-5 ml-0.5" />}
             </button>
 
             <button
@@ -196,7 +192,7 @@ export default function TelegramVideoModal() {
               className="text-slate-400 hover:text-white"
               title="-10 seconds"
             >
-              <RotateCcw className="w-4 h-4" />
+              <FiRotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={() => {
@@ -207,14 +203,14 @@ export default function TelegramVideoModal() {
               className="text-slate-400 hover:text-white"
               title="+10 seconds"
             >
-              <RotateCw className="w-4 h-4" />
+              <FiRotateCw className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex items-center space-x-4">
             <button
               onClick={cycleSpeed}
-              className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-300 hover:bg-telegram-blue hover:text-white transition-colors"
+              className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-300 hover:bg-[#2481cc] hover:text-white transition-colors"
             >
               {playbackRate}x
             </button>
@@ -224,7 +220,7 @@ export default function TelegramVideoModal() {
               title="Picture-in-Picture"
               className="p-2 text-slate-400 hover:text-white transition-colors"
             >
-              <PictureInPicture className="w-5 h-5" />
+              <FiMaximize2 className="w-5 h-5" />
             </button>
 
             <button
@@ -234,7 +230,7 @@ export default function TelegramVideoModal() {
               }}
               className="p-2 text-slate-400 hover:text-white transition-colors"
             >
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              {isMuted ? <FiVolumeX className="w-5 h-5" /> : <FiVolume2 className="w-5 h-5" />}
             </button>
           </div>
         </div>

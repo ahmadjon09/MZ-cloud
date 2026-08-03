@@ -1,11 +1,21 @@
 /**
- * Realtime Socket.IO Client
- * Listens for backend upload completions, folder modifications, and recycle bin events
+ * Realtime Socket.IO Client (MZ-CLOUD)
+ * Automatically connects to https://mz-cloud.onrender.com when running on vercel.app
  */
 import { io } from 'socket.io-client';
 import { useUploadStore } from '../store/useUploadStore';
 
 let socket = null;
+
+const getSocketUrl = () => {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://mz-cloud.onrender.com';
+  }
+  return '/';
+};
 
 export function initSocketClient(queryClient) {
   if (socket && socket.connected) {
@@ -14,7 +24,7 @@ export function initSocketClient(queryClient) {
 
   const token = localStorage.getItem('tgcloud_token') || undefined;
 
-  socket = io('/', {
+  socket = io(getSocketUrl(), {
     auth: {
       token,
       demoId: '777000'
@@ -24,19 +34,17 @@ export function initSocketClient(queryClient) {
   });
 
   socket.on('connect', () => {
-    console.log('⚡ Connected to Realtime Socket.IO server:', socket.id);
+    console.log('⚡ Connected to MZ-CLOUD Realtime Socket.IO server:', socket.id);
   });
 
-  // Handle upload completion
   socket.on('upload:completed', (payload) => {
     const uploadStore = useUploadStore.getState();
     const count = payload.count || 1;
-    uploadStore.addNotification(`✅ ${count} file(s) saved to Telegram Cloud!`, 'success');
+    uploadStore.addNotification(`✅ ${count} file(s) saved to MZ-CLOUD!`, 'success');
     queryClient.invalidateQueries({ queryKey: ['files'] });
     queryClient.invalidateQueries({ queryKey: ['authMe'] });
   });
 
-  // Handle file events
   socket.on('file:updated', () => {
     queryClient.invalidateQueries({ queryKey: ['files'] });
   });
@@ -51,7 +59,6 @@ export function initSocketClient(queryClient) {
     queryClient.invalidateQueries({ queryKey: ['authMe'] });
   });
 
-  // Handle folder events
   socket.on('folder:created', () => {
     queryClient.invalidateQueries({ queryKey: ['folders'] });
   });

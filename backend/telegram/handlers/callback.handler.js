@@ -1,6 +1,6 @@
 /**
- * Telegram Bot Callback Query Handler (Fast, Localized, Every Menu Works with Go Back Button)
- * Includes "🛡️ Super Admin Panel" interactive menu inside Telegram
+ * Telegram Bot Callback Query Handler (MZ-CLOUD)
+ * Fast, Localized, Every Menu & Button Works (including Notes, Tags, Folders, Favorites, Admin)
  */
 const fileService = require('../../services/file.service');
 const folderService = require('../../services/folder.service');
@@ -32,7 +32,7 @@ async function handleCallbackQuery(ctx) {
         [
           {
             text: i18n.btnOpenApp,
-            web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+            web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
           }
         ],
         [
@@ -88,7 +88,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: '🛡️ WebApp Admin Panelni Ochish',
-                web_app: { url: (process.env.WEBAPP_URL || 'http://localhost:5173') + '/?admin=true' }
+                web_app: { url: (process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app') + '/admin' }
               }
             ],
             [
@@ -126,7 +126,7 @@ async function handleCallbackQuery(ctx) {
         [
           {
             text: i18n.btnOpenApp,
-            web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+            web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
           }
         ],
         [
@@ -168,7 +168,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [
@@ -179,7 +179,7 @@ async function handleCallbackQuery(ctx) {
       }).catch(() => {});
     } else if (data === 'menu_help') {
       await ctx.answerCbQuery();
-      const helpText = `📚 <b>Telegram Cloud Storage Platform Help</b>\n\n` +
+      const helpText = `📚 <b>MZ-CLOUD Telegram Cloud Storage Platform Help</b>\n\n` +
         `<b>Commands:</b>\n` +
         `• /start - Launch Bot & Web App menu\n` +
         `• /stats - Check your personal storage usage\n` +
@@ -198,7 +198,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [
@@ -220,7 +220,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [
@@ -242,7 +242,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [
@@ -276,13 +276,158 @@ async function handleCallbackQuery(ctx) {
           [
             {
               text: i18n.btnOpenApp,
-              web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+              web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
             }
           ],
           [
             { text: i18n.btnBack, callback_data: `back_file_${updated.id}` }
           ]
         ]
+      }).catch(() => {});
+    } else if (data.startsWith('action_note_')) {
+      const fileId = data.replace('action_note_', '');
+      const file = await fileService.getFileById(fileId, user.id);
+      if (!file) {
+        return ctx.answerCbQuery('❌ File not found.');
+      }
+
+      await ctx.answerCbQuery();
+      const text = `📝 <b>Shaxsiy Eslatma & Caption</b>\n\n` +
+        `📄 <b>Fayl:</b> <code>${file.fileName}</code>\n` +
+        `💬 <b>Eslatma:</b>\n<i>${file.userNotes || 'Hozircha eslatma yozilmagan.'}</i>\n\n` +
+        `Eslatmalar, checklists va Markdown tahriri uchun MZ-CLOUD ilovasini oching:`;
+
+      return ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '📝 WebApp da Eslatma Yozish',
+                web_app: { url: (process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app') + `/?note=${file.id}` }
+              }
+            ],
+            [
+              { text: i18n.btnBack, callback_data: `back_file_${file.id}` }
+            ]
+          ]
+        }
+      }).catch(() => {});
+    } else if (data.startsWith('action_tag_')) {
+      const fileId = data.replace('action_tag_', '');
+      const file = await fileService.getFileById(fileId, user.id);
+      if (!file) {
+        return ctx.answerCbQuery('❌ File not found.');
+      }
+
+      await ctx.answerCbQuery();
+      let currentTags = [];
+      try {
+        currentTags = Array.isArray(file.tags) ? file.tags : JSON.parse(file.tags || '[]');
+      } catch (e) {
+        currentTags = [];
+      }
+
+      const presetTags = ['work', 'photo', 'important', 'personal', 'telegram', 'uzbekistan'];
+      const tagButtons = [];
+
+      for (let i = 0; i < presetTags.length; i += 2) {
+        const row = [];
+        for (let j = 0; j < 2 && i + j < presetTags.length; j++) {
+          const tag = presetTags[i + j];
+          const isSelected = currentTags.includes(tag);
+          row.push({
+            text: isSelected ? `✅ #${tag}` : `+#${tag}`,
+            callback_data: `toggle_tag_${file.id}_${tag}`
+          });
+        }
+        tagButtons.push(row);
+      }
+
+      tagButtons.push([
+        {
+          text: '🏷️ WebApp da Teglarni Tahrirlash',
+          web_app: { url: (process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app') + `/?tag=${file.id}` }
+        }
+      ]);
+      tagButtons.push([
+        { text: i18n.btnBack, callback_data: `back_file_${file.id}` }
+      ]);
+
+      const text = `🏷️ <b>Teglarni Boshqarish</b>\n\n` +
+        `📄 <b>Fayl:</b> <code>${file.fileName}</code>\n` +
+        `📌 <b>Hozirgi teglar:</b> <code>${currentTags.length > 0 ? currentTags.map((t) => '#' + t).join(' ') : 'Teg qo\'shilmagan'}</code>\n\n` +
+        `Quyidagi tugmalardan birini tanlab teg qo'shing yoki o'chiring:`;
+
+      return ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: tagButtons
+        }
+      }).catch(() => {});
+    } else if (data.startsWith('toggle_tag_')) {
+      const parts = data.replace('toggle_tag_', '').split('_');
+      const fileId = parts[0];
+      const tagToToggle = parts.slice(1).join('_');
+      const file = await fileService.getFileById(fileId, user.id);
+      if (!file) {
+        return ctx.answerCbQuery('❌ File not found.');
+      }
+
+      let currentTags = [];
+      try {
+        currentTags = Array.isArray(file.tags) ? file.tags : JSON.parse(file.tags || '[]');
+      } catch (e) {
+        currentTags = [];
+      }
+
+      let newTags = [];
+      if (currentTags.includes(tagToToggle)) {
+        newTags = currentTags.filter((t) => t !== tagToToggle);
+        await ctx.answerCbQuery(`🗑️ #${tagToToggle} tegi o'chirildi!`);
+      } else {
+        newTags = [...currentTags, tagToToggle];
+        await ctx.answerCbQuery(`✅ #${tagToToggle} tegi qo'shildi!`);
+      }
+
+      const updated = await fileService.updateFileMetadata(fileId, user.id, { tags: newTags });
+
+      const presetTags = ['work', 'photo', 'important', 'personal', 'telegram', 'uzbekistan'];
+      const tagButtons = [];
+
+      for (let i = 0; i < presetTags.length; i += 2) {
+        const row = [];
+        for (let j = 0; j < 2 && i + j < presetTags.length; j++) {
+          const tag = presetTags[i + j];
+          const isSelected = newTags.includes(tag);
+          row.push({
+            text: isSelected ? `✅ #${tag}` : `+#${tag}`,
+            callback_data: `toggle_tag_${fileId}_${tag}`
+          });
+        }
+        tagButtons.push(row);
+      }
+
+      tagButtons.push([
+        {
+          text: '🏷️ WebApp da Teglarni Tahrirlash',
+          web_app: { url: (process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app') + `/?tag=${fileId}` }
+        }
+      ]);
+      tagButtons.push([
+        { text: i18n.btnBack, callback_data: `back_file_${fileId}` }
+      ]);
+
+      const text = `🏷️ <b>Teglarni Boshqarish</b>\n\n` +
+        `📄 <b>Fayl:</b> <code>${updated.fileName}</code>\n` +
+        `📌 <b>Hozirgi teglar:</b> <code>${newTags.length > 0 ? newTags.map((t) => '#' + t).join(' ') : 'Teg qo\'shilmagan'}</code>\n\n` +
+        `Quyidagi tugmalardan birini tanlab teg qo'shing yoki o'chiring:`;
+
+      return ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: tagButtons
+        }
       }).catch(() => {});
     } else if (data.startsWith('action_folder_')) {
       const fileId = data.replace('action_folder_', '');
@@ -321,7 +466,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [
@@ -354,7 +499,7 @@ async function handleCallbackQuery(ctx) {
             [
               {
                 text: i18n.btnOpenApp,
-                web_app: { url: process.env.WEBAPP_URL || 'http://localhost:5173' }
+                web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
               }
             ],
             [

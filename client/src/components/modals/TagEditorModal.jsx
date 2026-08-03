@@ -1,15 +1,14 @@
 /**
- * Colored Tags Editor Modal
+ * Colored Tags Editor Modal (MZ-CLOUD - react-icons/fi)
  * Add and remove tags on any Saved Message file item
  */
 import React from 'react';
 import {
-  X,
-  Tag,
-  Plus,
-  Save,
-  Trash2
-} from 'lucide-react';
+  FiX,
+  FiTag,
+  FiPlus,
+  FiSave
+} from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useUpdateFile } from '../../hooks/useFiles';
 
@@ -61,17 +60,17 @@ export default function TagEditorModal() {
   const presetTags = ['work', 'personal', 'important', 'uzbekistan', 'project', 'telegram', 'archive'];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
       <div
-        className="w-full max-w-md bg-telegram-light-card dark:bg-telegram-dark-card border border-telegram-light-border dark:border-telegram-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-md bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-telegram-light-border dark:border-telegram-dark-border flex items-center justify-between bg-telegram-light dark:bg-telegram-dark/50">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
           <div className="flex items-center space-x-2.5">
-            <Tag className="w-5 h-5 text-telegram-blue" />
+            <FiTag className="w-5 h-5 text-[#2481cc]" />
             <div>
-              <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100">
+              <h3 className="font-semibold text-sm text-white">
                 Manage Colored Tags
               </h3>
               <span className="text-xs text-slate-400">
@@ -81,7 +80,7 @@ export default function TagEditorModal() {
           </div>
 
           <button onClick={closeTagEditor} className="p-1.5 text-slate-400 hover:text-slate-200">
-            <X className="w-5 h-5" />
+            <FiX className="w-5 h-5" />
           </button>
         </div>
 
@@ -94,20 +93,20 @@ export default function TagEditorModal() {
               placeholder="Type new tag and press enter (e.g. #travel)..."
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
-              className="flex-1 px-3 py-2 text-xs bg-telegram-light dark:bg-telegram-dark border border-telegram-light-border dark:border-telegram-dark-border rounded-xl text-slate-800 dark:text-slate-100 focus:outline-none focus:border-telegram-blue"
+              className="flex-1 px-3 py-2 text-xs bg-[#17212b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#2481cc]"
             />
             <button
               type="submit"
-              className="px-3.5 py-2 bg-telegram-blue hover:bg-telegram-blue-hover text-white text-xs font-semibold rounded-xl flex items-center space-x-1 shadow-sm"
+              className="px-3.5 py-2 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl flex items-center space-x-1 shadow-sm"
             >
-              <Plus className="w-4 h-4" />
+              <FiPlus className="w-4 h-4" />
               <span>Add</span>
             </button>
           </form>
 
           {/* Current tags badge array */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
               Assigned Tags ({tags.length})
             </label>
             {tags.length === 0 ? (
@@ -117,7 +116,7 @@ export default function TagEditorModal() {
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-telegram-blue/10 text-telegram-blue border border-telegram-blue/20"
+                    className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#2481cc]/10 text-[#2481cc] border border-[#2481cc]/20"
                   >
                     <span>#{tag}</span>
                     <button
@@ -125,7 +124,7 @@ export default function TagEditorModal() {
                       onClick={() => handleRemoveTag(tag)}
                       className="hover:text-red-500 transition-colors"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <FiX className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 ))}
@@ -134,7 +133,7 @@ export default function TagEditorModal() {
           </div>
 
           {/* Preset quick tag suggestions */}
-          <div className="pt-2 border-t border-telegram-light-border dark:border-telegram-dark-border">
+          <div className="pt-2 border-t border-white/10">
             <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
               Quick Suggestions
             </label>
@@ -151,8 +150,8 @@ export default function TagEditorModal() {
                     disabled={isSelected}
                     className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
                       isSelected
-                        ? 'bg-telegram-blue text-white border-telegram-blue opacity-50'
-                        : 'bg-telegram-light dark:bg-telegram-dark text-slate-600 dark:text-slate-300 border-telegram-light-border dark:border-telegram-dark-border hover:border-telegram-blue'
+                        ? 'bg-[#2481cc] text-white border-[#2481cc] opacity-50'
+                        : 'bg-[#17212b] text-slate-300 border-white/10 hover:border-[#2481cc]'
                     }`}
                   >
                     +{p}
@@ -164,19 +163,19 @@ export default function TagEditorModal() {
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-telegram-light-border dark:border-telegram-dark-border bg-telegram-light dark:bg-telegram-dark/50 flex items-center justify-end space-x-3">
+        <div className="px-6 py-4 border-t border-white/10 bg-[#17212b] flex items-center justify-end space-x-3">
           <button
             onClick={closeTagEditor}
-            className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:bg-white/5 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={updateFile.isPending}
-            className="flex items-center space-x-1.5 px-5 py-2 bg-telegram-blue hover:bg-telegram-blue-hover text-white text-xs font-semibold rounded-xl shadow-sm transition-all disabled:opacity-50"
+            className="flex items-center space-x-1.5 px-5 py-2 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl shadow-sm transition-all disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
+            <FiSave className="w-4 h-4" />
             <span>{updateFile.isPending ? 'Saving...' : 'Save Tags'}</span>
           </button>
         </div>

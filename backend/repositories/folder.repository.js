@@ -1,6 +1,6 @@
 /**
- * Folder Repository
- * Strict Multi-Tenant Data Isolation: Every query enforces userId matching
+ * Folder Repository (MZ-CLOUD)
+ * Strict Multi-Tenant Data Isolation: Matches by user CUID OR user.telegramId to guarantee zero missing folders
  */
 const prisma = require('../config/database');
 
@@ -12,7 +12,7 @@ class FolderRepository {
         name,
         parentId: parentId || null,
         color: color || '#2481cc',
-        emoji: emoji || '📁',
+        emoji: emoji || 'Folder',
         isSmart: Boolean(isSmart),
         smartFilter: smartFilter || null
       }
@@ -24,8 +24,11 @@ class FolderRepository {
     return prisma.folder.findFirst({
       where: {
         id: String(folderId),
-        userId: String(userId),
-        deletedAt: null
+        deletedAt: null,
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
       },
       include: {
         _count: {
@@ -41,8 +44,11 @@ class FolderRepository {
     }
 
     const where = {
-      userId: String(userId),
-      deletedAt: null
+      deletedAt: null,
+      OR: [
+        { userId: String(userId) },
+        { user: { telegramId: String(userId) } }
+      ]
     };
     if (!includeHidden) {
       where.isHidden = false;
@@ -90,9 +96,14 @@ class FolderRepository {
     }
 
     const now = new Date();
-    // First update files in this folder to have null folderId so they aren't orphaned
     await prisma.fileItem.updateMany({
-      where: { folderId: String(folderId), userId: String(userId) },
+      where: {
+        folderId: String(folderId),
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
+      },
       data: { folderId: null }
     });
 
@@ -102,9 +113,6 @@ class FolderRepository {
     });
   }
 
-  /**
-   * Build nested tree from flat list of folders
-   */
   buildTree(flatFolders) {
     const folderMap = new Map();
     const rootFolders = [];

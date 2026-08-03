@@ -1,17 +1,16 @@
 /**
- * Code & Document Modal Viewer
+ * Code & Document Modal Viewer (MZ-CLOUD)
  * Syntax-highlighted code viewer and Markdown document preview
+ * Uses react-icons/fi
  */
 import React from 'react';
 import {
-  X,
-  Copy,
-  Check,
-  FileText,
-  Code,
-  Download,
-  Share2
-} from 'lucide-react';
+  FiX,
+  FiCopy,
+  FiCheck,
+  FiFileText,
+  FiCode
+} from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 
 export default function CodeDocumentModal() {
@@ -22,7 +21,7 @@ export default function CodeDocumentModal() {
 
   const sampleCodeSnippet = `/**
  * ${file.fileName}
- * Telegram Cloud Storage Platform - High Performance Storage Worker
+ * MZ-CLOUD - High Performance Telegram CDN Storage Worker
  * Category: ${file.category} | Extension: .${file.extension}
  */
 
@@ -38,19 +37,19 @@ async function processTelegramCDNStream(fileId) {
 
 export default processTelegramCDNStream;`;
 
-  const sampleMarkdown = `### 📄 Document: ${file.fileName}
+  const sampleMarkdown = `### Document: ${file.fileName}
 
 **Telegram CDN Reference ID:** \`${file.fileId}\`
 
 ---
 
-#### 📝 Overview
-This document is securely indexed in the **Telegram Cloud Storage Platform** without permanent disk storage on any intermediate server.
+#### Overview
+This document is securely indexed in **MZ-CLOUD** without permanent disk storage on any intermediate server.
 
-#### 📌 Private Notes Attached
+#### Private Notes Attached
 ${file.userNotes || 'No private notes added yet.'}
 
-#### ⚡ Checklist
+#### Checklist
 - [x] Indexed in PostgreSQL FTS
 - [x] Redis Cache updated
 - [x] Ready for instant search`;
@@ -66,19 +65,19 @@ ${file.userNotes || 'No private notes added yet.'}
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div
-        className="w-full max-w-3xl bg-telegram-light-card dark:bg-telegram-dark-card border border-telegram-light-border dark:border-telegram-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-3xl bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-telegram-light-border dark:border-telegram-dark-border flex items-center justify-between bg-telegram-light dark:bg-telegram-dark/50">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
           <div className="flex items-center space-x-3">
             {file.category === 'CODE' ? (
-              <Code className="w-5 h-5 text-purple-500" />
+              <FiCode className="w-5 h-5 text-purple-400" />
             ) : (
-              <FileText className="w-5 h-5 text-telegram-blue" />
+              <FiFileText className="w-5 h-5 text-[#2481cc]" />
             )}
             <div>
-              <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100">
+              <h3 className="font-semibold text-sm text-white">
                 {file.fileName}
               </h3>
               <span className="text-xs text-slate-400">
@@ -90,29 +89,29 @@ ${file.userNotes || 'No private notes added yet.'}
           <div className="flex items-center space-x-2">
             <button
               onClick={handleCopy}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-telegram-blue/10 text-telegram-blue hover:bg-telegram-blue hover:text-white transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#2481cc]/10 text-[#2481cc] hover:bg-[#2481cc] hover:text-white transition-colors"
             >
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <FiCheck className="w-3.5 h-3.5" /> : <FiCopy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
             <button
               onClick={closeNoteEditor}
               className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg"
             >
-              <X className="w-5 h-5" />
+              <FiX className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Content Viewer Body */}
-        <div className="flex-1 overflow-y-auto p-6 font-mono text-xs leading-relaxed bg-slate-900 text-slate-200">
+        <div className="flex-1 overflow-y-auto p-6 font-mono text-xs leading-relaxed bg-slate-950 text-slate-200">
           <pre className="whitespace-pre-wrap">{content}</pre>
         </div>
 
         {/* Footer info */}
-        <div className="px-6 py-3 border-t border-telegram-light-border dark:border-telegram-dark-border bg-telegram-light dark:bg-telegram-dark/50 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-6 py-3 border-t border-white/10 bg-[#17212b] flex items-center justify-between text-xs text-slate-400">
           <span>Added: {new Date(file.createdAt).toLocaleDateString()}</span>
-          <span className="text-telegram-blue font-semibold">
+          <span className="text-[#2481cc] font-semibold">
             Stored in Telegram CDN
           </span>
         </div>

@@ -1,22 +1,22 @@
 /**
- * Telegram Gallery Modal Viewer (Images & Photos) - Vector Icons Only
+ * Telegram Gallery Modal Viewer (Images & Photos) - react-icons/fi
  * Directly renders real Telegram CDN image stream
  */
 import React from 'react';
 import {
-  X,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  Minimize2,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  FileText,
-  Tag,
-  Star,
-  Share2
-} from 'lucide-react';
+  FiX,
+  FiZoomIn,
+  FiZoomOut,
+  FiMaximize2,
+  FiMinimize2,
+  FiChevronLeft,
+  FiChevronRight,
+  FiInfo,
+  FiFileText,
+  FiTag,
+  FiStar,
+  FiShare2
+} from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useUpdateFile, useShareFile } from '../../hooks/useFiles';
 
@@ -128,7 +128,7 @@ export default function TelegramGalleryModal({ files = [] }) {
             title="Zoom Out"
             className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            <ZoomOut className="w-5 h-5" />
+            <FiZoomOut className="w-5 h-5" />
           </button>
           <span className="text-xs font-semibold w-8 text-center">
             {Math.round(zoom * 100)}%
@@ -138,29 +138,29 @@ export default function TelegramGalleryModal({ files = [] }) {
             title="Zoom In"
             className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            <ZoomIn className="w-5 h-5" />
+            <FiZoomIn className="w-5 h-5" />
           </button>
           <button
             onClick={handleToggleFullscreen}
             title="Toggle Fullscreen"
             className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            {isFullscreen ? <FiMinimize2 className="w-5 h-5" /> : <FiMaximize2 className="w-5 h-5" />}
           </button>
           <button
             onClick={() => setShowExif(!showExif)}
             title="Toggle EXIF Details"
             className={`p-2 rounded-full transition-colors ${
-              showExif ? 'text-telegram-blue bg-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
+              showExif ? 'text-[#2481cc] bg-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            <Info className="w-5 h-5" />
+            <FiInfo className="w-5 h-5" />
           </button>
           <button
             onClick={closeImageGallery}
             className="p-2 text-slate-300 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors ml-2"
           >
-            <X className="w-6 h-6" />
+            <FiX className="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function TelegramGalleryModal({ files = [] }) {
             onClick={handlePrev}
             className="absolute left-4 z-20 p-3 bg-black/40 hover:bg-black/70 text-white rounded-full transition-colors shadow-lg"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <FiChevronLeft className="w-6 h-6" />
           </button>
         )}
 
@@ -190,16 +190,16 @@ export default function TelegramGalleryModal({ files = [] }) {
             onClick={handleNext}
             className="absolute right-4 z-20 p-3 bg-black/40 hover:bg-black/70 text-white rounded-full transition-colors shadow-lg"
           >
-            <ChevronRight className="w-6 h-6" />
+            <FiChevronRight className="w-6 h-6" />
           </button>
         )}
       </div>
 
-      {/* EXIF Information Drawer (Slide-over on right) */}
+      {/* EXIF Information Drawer */}
       {showExif && (
-        <div className="absolute top-16 right-6 w-80 bg-telegram-dark-card/95 border border-telegram-dark-border rounded-2xl p-5 shadow-2xl text-xs text-slate-200 z-30 animate-in slide-in-from-right duration-200">
-          <h4 className="font-bold text-sm text-telegram-blue mb-3 flex items-center space-x-1.5">
-            <Info className="w-4 h-4" />
+        <div className="absolute top-16 right-6 w-80 bg-[#1e2329]/95 border border-white/10 rounded-2xl p-5 shadow-2xl text-xs text-slate-200 z-30 animate-in slide-in-from-right duration-200">
+          <h4 className="font-bold text-sm text-[#2481cc] mb-3 flex items-center space-x-1.5">
+            <FiInfo className="w-4 h-4" />
             <span>EXIF & Photo Metadata</span>
           </h4>
           <div className="space-y-2 text-slate-300">
@@ -220,7 +220,7 @@ export default function TelegramGalleryModal({ files = [] }) {
               <span className="font-semibold">{new Date(activeImageModalFile.createdAt).toLocaleDateString()}</span>
             </div>
             {activeImageModalFile.caption && (
-              <div className="pt-2 border-t border-telegram-dark-border mt-2">
+              <div className="pt-2 border-t border-white/10 mt-2">
                 <span className="text-slate-400 block mb-1">Telegram Caption:</span>
                 <p className="text-slate-200 italic">{activeImageModalFile.caption}</p>
               </div>
@@ -239,7 +239,7 @@ export default function TelegramGalleryModal({ files = [] }) {
               : 'bg-white/10 hover:bg-white/20 text-slate-200'
           }`}
         >
-          <Star className="w-4 h-4" />
+          <FiStar className="w-4 h-4" />
           <span>{activeImageModalFile.isFavorite ? 'Favorited' : 'Favorite'}</span>
         </button>
 
@@ -247,7 +247,7 @@ export default function TelegramGalleryModal({ files = [] }) {
           onClick={() => openNoteEditor(activeImageModalFile)}
           className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
         >
-          <FileText className="w-4 h-4" />
+          <FiFileText className="w-4 h-4" />
           <span>Private Notes</span>
         </button>
 
@@ -255,7 +255,7 @@ export default function TelegramGalleryModal({ files = [] }) {
           onClick={() => openTagEditor(activeImageModalFile)}
           className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
         >
-          <Tag className="w-4 h-4" />
+          <FiTag className="w-4 h-4" />
           <span>Tags</span>
         </button>
 
@@ -263,7 +263,7 @@ export default function TelegramGalleryModal({ files = [] }) {
           onClick={handleShare}
           className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
         >
-          <Share2 className="w-4 h-4" />
+          <FiShare2 className="w-4 h-4" />
           <span>Share Link</span>
         </button>
       </div>

@@ -1,6 +1,6 @@
 /**
- * Telegram Cloud Storage Platform - Backend API Server
- * Production-ready Enterprise Architecture
+ * MZ-CLOUD - Telegram CDN Cloud Storage Platform API Server
+ * Production-ready Enterprise Architecture (Render & Vercel compatible)
  */
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
@@ -37,7 +37,14 @@ app.use(securityMiddleware);
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Telegram-Init-Data', 'X-Demo-User-Id'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Telegram-Init-Data',
+    'X-Telegram-User-Id',
+    'X-Telegram-User-Data',
+    'X-Demo-User-Id'
+  ],
   exposedHeaders: ['X-Access-Token', 'X-Refresh-Token']
 }));
 app.use(compression());
@@ -64,10 +71,12 @@ app.get('/api/health', async (req, res) => {
 
   res.status(200).json({
     status: 'HEALTHY',
+    appName: 'MZ-CLOUD',
     timestamp: new Date().toISOString(),
     version: process.env.APP_VERSION || '1.0.0',
     database: dbStatus,
-    redis: 'ACTIVE'
+    redis: 'ACTIVE',
+    cdnStorage: 'TELEGRAM_CDN_ONLY'
   });
 });
 
@@ -87,7 +96,7 @@ app.get('*', (req, res, next) => {
         success: false,
         error: {
           code: 'ERR_NOT_FOUND',
-          message: 'Frontend bundle not found. Please build client using npm run build:client.'
+          message: 'MZ-CLOUD frontend bundle not found. Please build client using npm run build:client.'
         }
       });
     }
@@ -105,7 +114,7 @@ initCronJobs();
 const PORT = appConfig.port || 5000;
 server.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 ==========================================================`);
-  logger.info(`✨ Telegram Cloud Storage Platform Server running on port ${PORT}`);
+  logger.info(`✨ MZ-CLOUD Server running on port ${PORT}`);
   logger.info(`📚 OpenAPI Documentation available at http://localhost:${PORT}/api/v1/docs`);
   logger.info(`🔍 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`🚀 ==========================================================`);

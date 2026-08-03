@@ -1,11 +1,21 @@
 /**
- * API Client (Axios) - Production Quality
- * Configured with Telegram WebApp headers and automatic error handling
+ * API Client (Axios) - MZ-CLOUD Production Quality
+ * Automatically connects to https://mz-cloud.onrender.com/api/v1 when running on vercel.app
  */
 import axios from 'axios';
 
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://mz-cloud.onrender.com/api/v1';
+  }
+  return '/api/v1';
+};
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: getBaseUrl(),
   timeout: 30000
 });
 
@@ -15,7 +25,7 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Inject Telegram WebApp initData and user identity if running inside Telegram webview
+  // Inject Telegram WebApp initData and user identity
   const tgWebApp = window.Telegram?.WebApp;
   if (tgWebApp) {
     if (tgWebApp.initData) {

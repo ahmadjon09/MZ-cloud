@@ -1,14 +1,17 @@
 /**
- * Application Entry & Router Configuration
+ * Application Entry & Router Configuration (MZ-CLOUD)
  * Enforces Telegram WebApp Exclusive Access, TanStack Query, React Router, Socket.IO client, and Auth synchronization
+ * Includes /admin endpoint with Admin authorization verification
  */
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import AppLayout from './components/layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
+import AdminPage from './pages/AdminPage';
 import SharedFilePage from './pages/SharedFilePage';
 import MustOpenInTelegram from './components/common/MustOpenInTelegram';
+import AdminAccessDenied from './components/common/AdminAccessDenied';
 import { useAuthStore } from './store/useAuthStore';
 import api from './services/api';
 import { initSocketClient } from './services/socket';
@@ -68,6 +71,16 @@ function AuthSynchronizer({ children }) {
   return children;
 }
 
+function AdminRoute({ children }) {
+  const user = useAuthStore((s) => s.user);
+  if (!user) return null;
+  const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+  if (!isAdmin) {
+    return <AdminAccessDenied />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -77,6 +90,7 @@ export default function App() {
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
             </Route>
+            <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="/share/:token" element={<SharedFilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

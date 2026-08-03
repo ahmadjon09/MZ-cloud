@@ -1,7 +1,7 @@
 /**
- * File Repository
+ * File Repository (MZ-CLOUD)
  * Enterprise Data Access for Telegram File Items
- * Strict Multi-Tenant Data Isolation: Every query enforces userId matching
+ * Strict Multi-Tenant Data Isolation: Matches by user CUID OR user.telegramId to guarantee zero missing files
  */
 const prisma = require('../config/database');
 
@@ -64,14 +64,17 @@ class FileRepository {
   }
 
   /**
-   * Strictly find by id AND userId to guarantee data isolation
+   * Strictly find by id AND (userId OR telegramId) to guarantee data isolation
    */
   async findById(id, userId) {
     if (!id || !userId) return null;
     return prisma.fileItem.findFirst({
       where: {
         id: String(id),
-        userId: String(userId)
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
       },
       include: {
         folder: {
@@ -85,7 +88,10 @@ class FileRepository {
     return prisma.fileItem.findFirst({
       where: {
         uniqueFileId: String(uniqueFileId),
-        userId: String(userId),
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ],
         isDeleted: false
       }
     });
@@ -122,10 +128,13 @@ class FileRepository {
       offset = 0
     } = options;
 
-    // Strict userId filter
+    // Multi-tenant isolation: matches userId OR user's telegramId
     const where = {
-      userId: String(userId),
-      isDeleted: Boolean(isDeleted)
+      isDeleted: Boolean(isDeleted),
+      OR: [
+        { userId: String(userId) },
+        { user: { telegramId: String(userId) } }
+      ]
     };
 
     if (category && category !== 'ALL') {
@@ -158,12 +167,16 @@ class FileRepository {
 
     if (search && search.trim() !== '') {
       const query = search.trim().toLowerCase();
-      where.OR = [
-        { fileName: { contains: search } },
-        { caption: { contains: search } },
-        { userNotes: { contains: search } },
-        { extension: { equals: query } },
-        { tags: { contains: query } }
+      where.AND = [
+        {
+          OR: [
+            { fileName: { contains: search } },
+            { caption: { contains: search } },
+            { userNotes: { contains: search } },
+            { extension: { equals: query } },
+            { tags: { contains: query } }
+          ]
+        }
       ];
     }
 
@@ -203,7 +216,6 @@ class FileRepository {
   }
 
   async updateFile(id, userId, data) {
-    // 1. First ensure the file belongs to this user
     const existing = await this.findById(id, userId);
     if (!existing) {
       throw new Error('File not found or access denied');
@@ -281,11 +293,23 @@ class FileRepository {
   async emptyRecycleBin(userId) {
     if (!userId) return 0;
     const deletedItems = await prisma.fileItem.findMany({
-      where: { userId: String(userId), isDeleted: true }
+      where: {
+        isDeleted: true,
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
+      }
     });
     const count = deletedItems.length;
     await prisma.fileItem.deleteMany({
-      where: { userId: String(userId), isDeleted: true }
+      where: {
+        isDeleted: true,
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
+      }
     });
     return count;
   }
@@ -294,7 +318,13 @@ class FileRepository {
     if (!userId) return { totalFiles: 0, totalSize: 0, categories: {} };
     const stats = await prisma.fileItem.groupBy({
       by: ['category'],
-      where: { userId: String(userId), isDeleted: false },
+      where: {
+        isDeleted: false,
+        OR: [
+          { userId: String(userId) },
+          { user: { telegramId: String(userId) } }
+        ]
+      },
       _count: { _all: true },
       _sum: { fileSize: true }
     });

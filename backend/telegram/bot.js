@@ -9,6 +9,7 @@ const { handleHelpCommand, handleStatsCommand } = require('./commands/help.comma
 const { handleLangCommand } = require('./commands/lang.command');
 const { handleIncomingMedia } = require('./handlers/file.handler');
 const { handleCallbackQuery } = require('./handlers/callback.handler');
+const { handleIncomingText } = require('./handlers/text.handler');
 
 class TelegramBotManager {
   constructor() {
@@ -43,6 +44,9 @@ class TelegramBotManager {
 
       // Media Handlers
       this.bot.on(['document', 'photo', 'video', 'audio', 'voice', 'video_note'], handleIncomingMedia);
+
+      // Text Message Handler (Notes Reply & Search)
+      this.bot.on('text', handleIncomingText);
 
       // Callback Queries
       this.bot.on('callback_query', handleCallbackQuery);
