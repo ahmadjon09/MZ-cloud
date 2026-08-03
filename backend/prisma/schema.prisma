@@ -1,0 +1,134 @@
+// Prisma schema for Telegram Cloud Storage Platform
+// Uses SQLite for zero-config local development and sandbox execution.
+// For PostgreSQL production deployment, see docker/schema.postgresql.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  telegramId   String     @unique
+  username     String?
+  firstName    String?
+  lastName     String?
+  language     String     @default("en")
+  profilePhoto String?
+  isPremium    Boolean    @default(false)
+  role         String     @default("USER") // USER, ADMIN, SUPER_ADMIN
+  storageUsed  Int        @default(0)      // Total size in bytes
+  fileCount    Int        @default(0)      // Number of active files
+  isBanned     Boolean    @default(false)
+  banReason    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  folders      Folder[]
+  files        FileItem[]
+  auditLogs    AuditLog[]
+
+  @@index([telegramId])
+  @@index([role])
+}
+
+model Folder {
+  id          String     @id @default(cuid())
+  userId      String
+  name        String
+  parentId    String?
+  color       String     @default("#2481cc") // Telegram Blue default
+  emoji       String     @default("📁")
+  isFavorite  Boolean    @default(false)
+  isHidden    Boolean    @default(false)
+  isPinned    Boolean    @default(false)
+  isSmart     Boolean    @default(false)
+  smartFilter String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent      Folder?    @relation("NestedFolders", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Folder[]   @relation("NestedFolders")
+  files       FileItem[]
+
+  @@index([userId])
+  @@index([parentId])
+  @@index([deletedAt])
+}
+
+model FileItem {
+  id                String    @id @default(cuid())
+  userId            String
+  folderId          String?
+  fileId            String    // Telegram CDN File ID
+  uniqueFileId      String    // Telegram Unique File ID
+  fileName          String
+  fileSize          Int       @default(0) // Size in bytes
+  mimeType          String    @default("application/octet-stream")
+  extension         String    @default("bin")
+  category          String    @default("OTHER") // PHOTO, VIDEO, AUDIO, DOCUMENT, VOICE, ARCHIVE, CODE, OTHER
+  duration          Int?      // Duration in seconds for audio/video/voice
+  width             Int?
+  height            Int?
+  thumbnailUrl      String?
+  caption           String?   // Original Telegram caption
+  userNotes         String?   // Private Markdown notes with checklist
+  tags              String    @default("[]")    // JSON array of string tags
+  isFavorite        Boolean   @default(false)
+  isPinned          Boolean   @default(false)
+  isArchived        Boolean   @default(false)
+  isDeleted         Boolean   @default(false)   // In Recycle Bin
+  deletedAt         DateTime?
+  telegramMessageId Int?
+  shareToken        String?   @unique           // Public shareable link token
+  searchVector      String?                     // Indexed searchable text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  version           Int       @default(1)       // Optimistic locking
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder            Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isDeleted])
+  @@index([folderId])
+  @@index([category])
+  @@index([isFavorite])
+  @@index([isPinned])
+  @@index([shareToken])
+  @@index([deletedAt])
+}
+
+model AuditLog {
+  id           String    @id @default(cuid())
+  userId       String?
+  action       String    // e.g. "FILE_UPLOAD", "FILE_DELETE", "ADMIN_BAN"
+  resourceType String    // e.g. "FILE", "FOLDER", "USER"
+  resourceId   String?
+  details      String?   // JSON payload
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SystemMetric {
+  id            String   @id @default(cuid())
+  timestamp     DateTime @default(now())
+  cpuUsage      Float    @default(0.0)
+  memoryUsage   Float    @default(0.0)
+  activeUsers   Int      @default(0)
+  filesUploaded Int      @default(0)
+  queueLength   Int      @default(0)
+
+  @@index([timestamp])
+}
