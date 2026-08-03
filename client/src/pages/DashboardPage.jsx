@@ -1,5 +1,5 @@
 /**
- * Telegram Cloud Storage - Main Dashboard Page
+ * MZ-CLOUD - Main Dashboard Page
  * Connects navigation state, file queries, views, and modal overlays
  */
 import React from 'react';
@@ -16,9 +16,10 @@ import TagEditorModal from '../components/modals/TagEditorModal';
 import FolderModal from '../components/modals/FolderModal';
 import ShareModal from '../components/modals/ShareModal';
 import SearchModal from '../components/modals/SearchModal';
+import PremiumModal from '../components/modals/PremiumModal';
 
 export default function DashboardPage() {
-  const { activeNav, activeFolderId, sortBy, sortOrder } = useUIStore();
+  const { activeNav, activeFolderId, sortBy, sortOrder, isPremiumModalOpen, closePremiumModal } = useUIStore();
 
   const queryOptions = React.useMemo(() => {
     const opts = {
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-telegram-light dark:bg-telegram-dark transition-colors duration-200">
+    <div className="flex-1 flex flex-col bg-[#17212b] transition-colors duration-200">
       <FileGrid
         files={files}
         total={total}
@@ -70,6 +71,7 @@ export default function DashboardPage() {
       <FolderModal />
       <ShareModal />
       <SearchModal />
+      <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremiumModal} />
     </div>
   );
 }

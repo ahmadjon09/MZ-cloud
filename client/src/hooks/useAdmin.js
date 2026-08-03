@@ -1,6 +1,7 @@
 /**
- * TanStack Query Hooks for Super Admin Control Panel (MZ-CLOUD)
- * Includes useAddAdmin and useUpdateUserRole
+ * TanStack Query Hooks for Super Admin Control Panel and MZ-CLOUD Premium (Telegram Stars)
+ * Includes useAddAdmin, useUpdateUserRole, useCreateStarsInvoice, and useToggleDemoPremium
+ * Zero unicode emojis in toast notifications (react-icons/fi only)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
@@ -37,7 +38,7 @@ export function useAddAdmin() {
       return res.data;
     },
     onSuccess: (data) => {
-      uploadStore.addNotification(data.message || '✅ Yangi Admin muvaffaqiyatli qo\'shildi!', 'success');
+      uploadStore.addNotification(data.message || 'Yangi Admin muvaffaqiyatli qo\'shildi!', 'success');
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
       queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
     }
@@ -54,7 +55,7 @@ export function useUpdateUserRole() {
       return res.data;
     },
     onSuccess: (data) => {
-      uploadStore.addNotification(`✅ Rol o'zgartirildi: ${data.user?.role || 'USER'}`, 'success');
+      uploadStore.addNotification(`Rol o'zgartirildi: ${data.user?.role || 'USER'}`, 'success');
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
       queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
     }
@@ -71,7 +72,7 @@ export function useSetUserBanStatus() {
       return res.data;
     },
     onSuccess: (data) => {
-      const msg = data.user?.isBanned ? '🚫 User Banned' : '✅ User Unbanned';
+      const msg = data.user?.isBanned ? 'User Banned' : 'User Unbanned';
       uploadStore.addNotification(msg, 'success');
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
       queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
@@ -87,8 +88,50 @@ export function useBroadcastMessage() {
       const res = await api.post('/admin/broadcast', { message, markdown });
       return res.data;
     },
+    onSuccess: () => {
+      uploadStore.addNotification('Broadcast message dispatched to queue!', 'success');
+    }
+  });
+}
+
+/**
+ * Send a Telegram Stars (XTR) Invoice directly to the user's Telegram chat
+ */
+export function useCreateStarsInvoice() {
+  const uploadStore = useUploadStore();
+
+  return useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/auth/create-stars-invoice');
+      return res.data;
+    },
     onSuccess: (data) => {
-      uploadStore.addNotification('📢 Broadcast message dispatched to queue!', 'success');
+      uploadStore.addNotification(
+        data.message || '50 Telegram Stars to\'lov hisobi chatingizga yuborildi!',
+        'success'
+      );
+    }
+  });
+}
+
+/**
+ * Dev toggle to instantly test MZ-CLOUD Premium on/off in the WebApp
+ */
+export function useToggleDemoPremium() {
+  const queryClient = useQueryClient();
+  const uploadStore = useUploadStore();
+
+  return useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/auth/toggle-demo-premium');
+      return res.data;
+    },
+    onSuccess: (data) => {
+      uploadStore.addNotification(
+        data.message || 'MZ-CLOUD Premium statusi yangilandi',
+        'success'
+      );
+      queryClient.invalidateQueries({ queryKey: ['authMe'] });
     }
   });
 }

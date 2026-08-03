@@ -2,6 +2,7 @@
  * Versioned API Router - /api/v1 (MZ-CLOUD)
  * Complete RESTful routes for Telegram Cloud Storage Platform
  * Includes HTTP Range-supported Telegram CDN streaming endpoints (/preview, /stream, /thumbnail, /download)
+ * Includes Telegram Stars (XTR) Premium invoice endpoint (/auth/create-stars-invoice)
  */
 const express = require('express');
 const authController = require('../controllers/auth.controller');
@@ -38,6 +39,8 @@ router.use('/docs', docsRouter);
 router.post('/auth/telegram-login', authController.telegramLogin);
 router.post('/auth/refresh', authController.refreshToken);
 router.get('/auth/me', authMiddleware, authController.getCurrentUser);
+router.post('/auth/create-stars-invoice', authMiddleware, authController.createStarsInvoice);
+router.post('/auth/toggle-demo-premium', authMiddleware, authController.toggleDemoPremium);
 
 // Public Share Link Route
 router.get('/share/:token', shareController.getSharedFile);

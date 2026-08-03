@@ -1,6 +1,7 @@
 /**
  * TanStack Query Hooks for Files & Saved Messages items (MZ-CLOUD)
  * Includes useSendToTelegram() hook to forward any CDN file directly to the user's Telegram chat
+ * Zero unicode emojis in toast notifications (react-icons/fi only)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
@@ -48,7 +49,7 @@ export function useParallelUpload() {
     },
     onSuccess: (data) => {
       uploadStore.addNotification(
-        `✅ Upload processed (${data.count || 'batch'} files)`,
+        `Upload processed (${data.count || 'batch'} files)`,
         'success'
       );
       queryClient.invalidateQueries({ queryKey: ['files'] });
@@ -108,8 +109,8 @@ export function useSendToTelegram() {
       const res = await api.post(`/files/${id}/send-to-telegram`);
       return res.data;
     },
-    onSuccess: (data) => {
-      uploadStore.addNotification('✈️ Fayl Telegram chatingizga yuborildi!', 'success');
+    onSuccess: () => {
+      uploadStore.addNotification('Fayl Telegram chatingizga yuborildi!', 'success');
     }
   });
 }
@@ -124,7 +125,7 @@ export function useDeleteFile() {
       return res.data;
     },
     onSuccess: () => {
-      uploadStore.addNotification('🗑️ Moved to Recycle Bin', 'success');
+      uploadStore.addNotification('Moved to Recycle Bin', 'success');
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['authMe'] });
     }
@@ -141,7 +142,7 @@ export function useRestoreFile() {
       return res.data;
     },
     onSuccess: () => {
-      uploadStore.addNotification('↩️ File Restored!', 'success');
+      uploadStore.addNotification('File Restored!', 'success');
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['authMe'] });
     }
@@ -158,7 +159,7 @@ export function usePermanentDeleteFile() {
       return res.data;
     },
     onSuccess: () => {
-      uploadStore.addNotification('🔥 File permanently deleted', 'success');
+      uploadStore.addNotification('File permanently deleted', 'success');
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['authMe'] });
     }
@@ -175,7 +176,7 @@ export function useEmptyRecycleBin() {
       return res.data;
     },
     onSuccess: (data) => {
-      uploadStore.addNotification(`🧹 Recycle Bin emptied (${data.count} items removed)`, 'success');
+      uploadStore.addNotification(`Recycle Bin emptied (${data.count} items removed)`, 'success');
       queryClient.invalidateQueries({ queryKey: ['files'] });
       queryClient.invalidateQueries({ queryKey: ['authMe'] });
     }

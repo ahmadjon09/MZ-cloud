@@ -1,6 +1,7 @@
 /**
  * Realtime Socket.IO Client (MZ-CLOUD)
  * Automatically connects to https://mz-cloud.onrender.com when running on vercel.app
+ * Zero unicode emojis in notifications
  */
 import { io } from 'socket.io-client';
 import { useUploadStore } from '../store/useUploadStore';
@@ -34,13 +35,13 @@ export function initSocketClient(queryClient) {
   });
 
   socket.on('connect', () => {
-    console.log('⚡ Connected to MZ-CLOUD Realtime Socket.IO server:', socket.id);
+    console.log('Connected to MZ-CLOUD Realtime Socket.IO server:', socket.id);
   });
 
   socket.on('upload:completed', (payload) => {
     const uploadStore = useUploadStore.getState();
     const count = payload.count || 1;
-    uploadStore.addNotification(`✅ ${count} file(s) saved to MZ-CLOUD!`, 'success');
+    uploadStore.addNotification(`${count} file(s) saved to MZ-CLOUD!`, 'success');
     queryClient.invalidateQueries({ queryKey: ['files'] });
     queryClient.invalidateQueries({ queryKey: ['authMe'] });
   });

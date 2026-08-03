@@ -1,12 +1,15 @@
 /**
  * Telegram Bot Manager (Production Quality, Fast, No Custom Emojis - MZ-CLOUD)
+ * Supports Telegram Stars (XTR) payment for MZ-CLOUD custom Premium membership
  */
 const { Telegraf } = require('telegraf');
 const appConfig = require('../config/app.config');
 const logger = require('../config/logger');
+const userRepository = require('../repositories/user.repository');
 const { handleStartCommand } = require('./commands/start.command');
 const { handleHelpCommand, handleStatsCommand } = require('./commands/help.command');
 const { handleLangCommand } = require('./commands/lang.command');
+const { handlePremiumCommand } = require('./commands/premium.command');
 const { handleIncomingMedia } = require('./handlers/file.handler');
 const { handleCallbackQuery } = require('./handlers/callback.handler');
 const { handleIncomingText } = require('./handlers/text.handler');
@@ -42,6 +45,44 @@ class TelegramBotManager {
       this.bot.command('help', handleHelpCommand);
       this.bot.command('stats', handleStatsCommand);
       this.bot.command('lang', handleLangCommand);
+      this.bot.command('premium', handlePremiumCommand);
+
+      // Telegram Stars (XTR) Pre-checkout and Payment Handlers
+      this.bot.on('pre_checkout_query', async (ctx) => {
+        try {
+          await ctx.answerPreCheckoutQuery(true);
+        } catch (e) {
+          logger.error({ err: e.message }, 'Pre-checkout query error');
+        }
+      });
+
+      this.bot.on('successful_payment', async (ctx) => {
+        try {
+          const payment = ctx.message.successful_payment;
+          logger.info({ totalAmount: payment.total_amount, currency: payment.currency }, '⭐ Successful Telegram Stars payment received');
+
+          const tgId = String(ctx.from?.id);
+          const user = await userRepository.findByTelegramId(tgId);
+          if (user) {
+            await userRepository.updatePremiumStatus(user.id, true);
+            await ctx.reply(`🎉 <b>Tabriklaymiz, ${user.firstName}!</b>\n\nSiz MZ-CLOUD Premium a'zosi bo'ldingiz! Barcha reklamalar o'chirildi va VIP oltin yulduz statusi faollashtirildi.`, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: '🌐 MZ-CLOUD Ilovasini Ochish',
+                      web_app: { url: process.env.WEBAPP_URL || 'https://mz-cloud.vercel.app' }
+                    }
+                  ]
+                ]
+              }
+            });
+          }
+        } catch (e) {
+          logger.error({ err: e.message }, 'Successful payment processing error');
+        }
+      });
 
       // Media Handlers
       this.bot.on(['document', 'photo', 'video', 'audio', 'voice', 'video_note'], handleIncomingMedia);

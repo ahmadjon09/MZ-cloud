@@ -1,6 +1,6 @@
 /**
  * Internationalization (i18next) - English, Russian, and Uzbek
- * Complete Translations for Telegram Cloud Storage Platform (Vector icons only, no text emojis)
+ * Complete Translations for MZ-CLOUD Platform (Vector icons only, no text emojis)
  */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -10,7 +10,7 @@ const resources = {
   en: {
     translation: {
       app: {
-        title: 'Telegram Cloud Storage',
+        title: 'MZ-CLOUD Storage',
         subtitle: 'Personal Cloud built on Telegram Saved Messages',
         searchPlaceholder: 'Search files, folders, notes, tags... (Cmd + K)',
         demoGenerator: 'Generate Demo Files',
@@ -59,11 +59,12 @@ const resources = {
         permanentDelete: 'Delete Permanently',
         save: 'Save Changes',
         cancel: 'Cancel',
-        confirm: 'Confirm'
+        confirm: 'Confirm',
+        sendToTelegram: 'Send to my Telegram'
       },
       files: {
-        emptyTitle: 'Your Telegram Cloud is Empty',
-        emptySub: 'Drag & Drop files here, forward messages to your bot, or click "Generate Demo Files" above to test immediately!',
+        emptyTitle: 'Your MZ-CLOUD is Empty',
+        emptySub: 'Send any photo, video, document, or music track to your Telegram bot to see it appear here instantly!',
         itemCount: 'files',
         size: 'Size',
         date: 'Added',
@@ -109,7 +110,7 @@ const resources = {
   ru: {
     translation: {
       app: {
-        title: 'Облако Telegram',
+        title: 'Облако MZ-CLOUD',
         subtitle: 'Личное хранилище на базе Избранного Telegram',
         searchPlaceholder: 'Поиск файлов, папок, заметок, тегов... (Cmd + K)',
         demoGenerator: 'Создать демо-файлы',
@@ -158,11 +159,12 @@ const resources = {
         permanentDelete: 'Удалить навсегда',
         save: 'Сохранить',
         cancel: 'Отмена',
-        confirm: 'Подтвердить'
+        confirm: 'Подтвердить',
+        sendToTelegram: 'Отправить в Telegram чат'
       },
       files: {
-        emptyTitle: 'Ваше облако Telegram пока пусто',
-        emptySub: 'Перетащите файлы сюда, пересылайте в бота или нажмите «Создать демо-файлы» для тестирования!',
+        emptyTitle: 'Ваше облако MZ-CLOUD пока пусто',
+        emptySub: 'Отправьте любое фото, видео, документ или музыку в бот Telegram, чтобы увидеть их здесь мгновенно!',
         itemCount: 'файлов',
         size: 'Размер',
         date: 'Добавлено',
@@ -208,7 +210,7 @@ const resources = {
   uz: {
     translation: {
       app: {
-        title: 'Telegram Bulutli Xotirasi',
+        title: 'MZ-CLOUD Bulutli Xotira',
         subtitle: 'Telegram Saqlangan xabarlarga asoslangan shaxsiy bulut',
         searchPlaceholder: 'Fayllar, papkalar, eslatmalar, teglarni qidirish... (Cmd + K)',
         demoGenerator: 'Demo fayllarni yaratish',
@@ -257,11 +259,12 @@ const resources = {
         permanentDelete: 'Butunlay o‘chirish',
         save: 'Saqlash',
         cancel: 'Bekor qilish',
-        confirm: 'Tasdiqlash'
+        confirm: 'Tasdiqlash',
+        sendToTelegram: 'Telegram chatingizga yuborish'
       },
       files: {
-        emptyTitle: 'Sizning bulutingiz hozircha bo‘sh',
-        emptySub: 'Fayllarni bu yerga torting, botga yuboring yoki darhol test qilish uchun yuqoridagi "Demo fayllarni yaratish" tugmasini bosing!',
+        emptyTitle: 'Sizning MZ-CLOUD bulutingiz hozircha bo‘sh',
+        emptySub: 'Istalgan rasm, video, hujjat yoki musiqani Telegram botingizga yuboring va ular ushbu ekranda darhol paydo bo\'ladi!',
         itemCount: 'fayl',
         size: 'Hajmi',
         date: 'Qo‘shilgan sana',

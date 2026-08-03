@@ -19,9 +19,10 @@ export const useUIStore = create((set) => ({
   activeVideoModalFile: null,
   activeNoteModalFile: null,
   activeTagModalFile: null,
-  activeFolderModalFolder: null, // null for new, folder obj for edit
+  activeFolderModalFolder: null,
   activeShareModalFile: null,
   isFolderModalOpen: false,
+  isPremiumModalOpen: false,
 
   setSidebarCollapsed: (val) => set({ isSidebarCollapsed: val }),
   setMobileSidebarOpen: (val) => set({ isMobileSidebarOpen: val }),
@@ -44,5 +45,7 @@ export const useUIStore = create((set) => ({
   openFolderModal: (folder = null) => set({ isFolderModalOpen: true, activeFolderModalFolder: folder }),
   closeFolderModal: () => set({ isFolderModalOpen: false, activeFolderModalFolder: null }),
   openShareModal: (file) => set({ activeShareModalFile: file }),
-  closeShareModal: () => set({ activeShareModalFile: null })
+  closeShareModal: () => set({ activeShareModalFile: null }),
+  openPremiumModal: () => set({ isPremiumModalOpen: true }),
+  closePremiumModal: () => set({ isPremiumModalOpen: false })
 }));

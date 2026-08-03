@@ -1,5 +1,6 @@
 /**
- * User Repository
+ * User Repository (MZ-CLOUD)
+ * Strict Multi-Tenant Data Isolation: Manages user profiles, language selection, storage metrics, roles, and MZ-CLOUD Premium status
  */
 const prisma = require('../config/database');
 const { ROLES } = require('../constants/permissions');
@@ -40,8 +41,7 @@ class UserRepository {
         username: profile.username || null,
         firstName: profile.firstName || profile.first_name || undefined,
         lastName: profile.lastName || profile.last_name || undefined,
-        profilePhoto: profile.profilePhoto || profile.photo_url || undefined,
-        isPremium: Boolean(profile.isPremium || profile.is_premium)
+        profilePhoto: profile.profilePhoto || profile.photo_url || undefined
       }
     });
   }
@@ -51,6 +51,17 @@ class UserRepository {
     return prisma.user.update({
       where: { id: String(userId) },
       data: { language: String(langCode).toLowerCase() }
+    });
+  }
+
+  /**
+   * Update MZ-CLOUD custom Premium membership status (unlocked via Telegram Stars)
+   */
+  async updatePremiumStatus(userId, isPremium) {
+    if (!userId) return null;
+    return prisma.user.update({
+      where: { id: String(userId) },
+      data: { isPremium: Boolean(isPremium) }
     });
   }
 

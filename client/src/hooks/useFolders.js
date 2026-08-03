@@ -1,5 +1,6 @@
 /**
- * TanStack Query Hooks for Folders & Breadcrumbs
+ * TanStack Query Hooks for Folders & Breadcrumbs (MZ-CLOUD)
+ * Zero unicode emojis in toast notifications (react-icons/fi only)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
@@ -39,7 +40,7 @@ export function useCreateFolder() {
       return res.data.folder;
     },
     onSuccess: () => {
-      uploadStore.addNotification('📁 New Folder Created!', 'success');
+      uploadStore.addNotification('New Folder Created!', 'success');
       queryClient.invalidateQueries({ queryKey: ['folders'] });
     }
   });
@@ -55,7 +56,7 @@ export function useUpdateFolder() {
       return res.data.folder;
     },
     onSuccess: () => {
-      uploadStore.addNotification('✅ Folder Updated', 'success');
+      uploadStore.addNotification('Folder Updated', 'success');
       queryClient.invalidateQueries({ queryKey: ['folders'] });
     }
   });
@@ -71,7 +72,7 @@ export function useDeleteFolder() {
       return res.data;
     },
     onSuccess: () => {
-      uploadStore.addNotification('🗑️ Folder Deleted', 'success');
+      uploadStore.addNotification('Folder Deleted', 'success');
       queryClient.invalidateQueries({ queryKey: ['folders'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
     }

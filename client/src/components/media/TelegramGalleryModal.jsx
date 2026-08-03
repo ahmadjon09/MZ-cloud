@@ -1,7 +1,6 @@
 /**
  * Telegram Gallery Modal Viewer (Images & Photos) - react-icons/fi
- * Directly renders real Telegram CDN image stream
- * Includes "Send to my Telegram" button
+ * Directly renders real Telegram CDN image stream with automatic URL auth parameters
  */
 import React from 'react';
 import {
@@ -21,6 +20,7 @@ import {
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useUpdateFile, useShareFile, useSendToTelegram } from '../../hooks/useFiles';
+import { getFileThumbnailUrl } from '../../services/api';
 
 export default function TelegramGalleryModal({ files = [] }) {
   const {
@@ -38,6 +38,7 @@ export default function TelegramGalleryModal({ files = [] }) {
   const [zoom, setZoom] = React.useState(1);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [showExif, setShowExif] = React.useState(false);
+  const [imgErr, setImgErr] = React.useState(false);
 
   const photoList = React.useMemo(() => {
     return files.filter((f) => f.category === 'PHOTO');
@@ -49,6 +50,7 @@ export default function TelegramGalleryModal({ files = [] }) {
   }, [activeImageModalFile, photoList]);
 
   React.useEffect(() => {
+    setImgErr(false);
     const handleKeyDown = (e) => {
       if (!activeImageModalFile) return;
       if (e.key === 'Escape') {
@@ -106,9 +108,10 @@ export default function TelegramGalleryModal({ files = [] }) {
     }
   };
 
+  // Uses getFileThumbnailUrl to include query parameter authentication (?token=...&tgId=...)
   const photoUrl =
     activeImageModalFile.thumbnailUrl ||
-    `/api/v1/files/${activeImageModalFile.id}/thumbnail`;
+    getFileThumbnailUrl(activeImageModalFile.id);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200 font-sans">
@@ -180,12 +183,32 @@ export default function TelegramGalleryModal({ files = [] }) {
         )}
 
         <div className="overflow-auto max-h-full max-w-full flex items-center justify-center p-8">
-          <img
-            src={photoUrl}
-            alt={activeImageModalFile.fileName}
-            style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s ease-out' }}
-            className="max-h-[80vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
-          />
+          {!imgErr ? (
+            <img
+              src={photoUrl}
+              alt={activeImageModalFile.fileName}
+              style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s ease-out' }}
+              className="max-h-[80vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
+              onError={() => setImgErr(true)}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-12 bg-[#1e2329] rounded-2xl border border-white/10 text-center max-w-md">
+              <div className="w-16 h-16 rounded-full bg-[#2481cc]/20 text-[#2481cc] flex items-center justify-center mb-4 text-2xl font-bold">
+                IMG
+              </div>
+              <h4 className="text-white font-semibold text-sm mb-1">{activeImageModalFile.fileName}</h4>
+              <p className="text-xs text-slate-400 mb-4">
+                Ushbu rasm Telegram CDN da saqlanmoqda. Ko'rish yoki yuklab olish uchun quyidagi tugmani bosing:
+              </p>
+              <button
+                onClick={() => sendToTg.mutate(activeImageModalFile.id)}
+                className="px-5 py-2.5 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl shadow-md transition-all flex items-center space-x-2"
+              >
+                <FiSend className="w-4 h-4" />
+                <span>Telegram chatingizga yuborish</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {photoList.length > 1 && (

@@ -5,7 +5,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 require('dotenv').config();
-const { default: axios } = require('axios');
+
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ const redisClient = require('./config/redis');
 const socketServer = require('./socket/socket.server');
 const telegramBot = require('./telegram/bot');
 const { initCronJobs } = require('./cron/cleanup.cron');
-
+const { default: axios } = require('axios');
 const securityMiddleware = require('./middlewares/security.middleware');
 const errorHandler = require('./middlewares/error.middleware');
 const apiV1Router = require('./routes/api.v1');
@@ -92,6 +92,7 @@ app.get('/api/health', async (req, res) => {
 
 // API Version 1 Routes
 app.use('/api/v1', apiV1Router);
+
 const keepServerAlive = () => {
   if (!process.env.BASE_URL) {
     console.warn('⚠️ BASE_URL is not set. Skipping ping.')
