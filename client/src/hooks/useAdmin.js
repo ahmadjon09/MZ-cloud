@@ -1,5 +1,6 @@
 /**
- * TanStack Query Hooks for Super Admin Control Panel
+ * TanStack Query Hooks for Super Admin Control Panel (MZ-CLOUD)
+ * Includes useAddAdmin and useUpdateUserRole
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
@@ -12,7 +13,7 @@ export function useAdminAnalytics() {
       const res = await api.get('/admin/analytics');
       return res.data;
     },
-    refetchInterval: 15000 // Refetch server health every 15 seconds
+    refetchInterval: 15000
   });
 }
 
@@ -22,6 +23,40 @@ export function useAdminUsers(params = {}) {
     queryFn: async () => {
       const res = await api.get('/admin/users', { params });
       return res.data;
+    }
+  });
+}
+
+export function useAddAdmin() {
+  const queryClient = useQueryClient();
+  const uploadStore = useUploadStore();
+
+  return useMutation({
+    mutationFn: async ({ telegramIdOrUsername }) => {
+      const res = await api.post('/admin/add-admin', { telegramIdOrUsername });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      uploadStore.addNotification(data.message || '✅ Yangi Admin muvaffaqiyatli qo\'shildi!', 'success');
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
+    }
+  });
+}
+
+export function useUpdateUserRole() {
+  const queryClient = useQueryClient();
+  const uploadStore = useUploadStore();
+
+  return useMutation({
+    mutationFn: async ({ userId, role }) => {
+      const res = await api.patch(`/admin/users/${userId}/role`, { role });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      uploadStore.addNotification(`✅ Rol o'zgartirildi: ${data.user?.role || 'USER'}`, 'success');
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
     }
   });
 }

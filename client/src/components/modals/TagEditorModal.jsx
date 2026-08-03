@@ -1,6 +1,7 @@
 /**
  * Colored Tags Editor Modal (MZ-CLOUD - react-icons/fi)
  * Add and remove tags on any Saved Message file item
+ * 100% Mobile Responsive
  */
 import React from 'react';
 import {
@@ -60,20 +61,20 @@ export default function TagEditorModal() {
   const presetTags = ['work', 'personal', 'important', 'uzbekistan', 'project', 'telegram', 'archive'];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 font-sans">
       <div
-        className="w-full max-w-md bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-md bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
           <div className="flex items-center space-x-2.5">
             <FiTag className="w-5 h-5 text-[#2481cc]" />
             <div>
-              <h3 className="font-semibold text-sm text-white">
+              <h3 className="font-semibold text-xs sm:text-sm text-white">
                 Manage Colored Tags
               </h3>
-              <span className="text-xs text-slate-400">
+              <span className="text-[10px] sm:text-xs text-slate-400">
                 {file.fileName}
               </span>
             </div>
@@ -85,7 +86,7 @@ export default function TagEditorModal() {
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {/* Tag input form */}
           <form onSubmit={handleAddTag} className="flex items-center space-x-2">
             <input
@@ -148,7 +149,7 @@ export default function TagEditorModal() {
                       if (!isSelected) setTags([...tags, p]);
                     }}
                     disabled={isSelected}
-                    className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                    className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
                       isSelected
                         ? 'bg-[#2481cc] text-white border-[#2481cc] opacity-50'
                         : 'bg-[#17212b] text-slate-300 border-white/10 hover:border-[#2481cc]'
@@ -163,7 +164,7 @@ export default function TagEditorModal() {
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#17212b] flex items-center justify-end space-x-3">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-white/10 bg-[#17212b] flex items-center justify-end space-x-3">
           <button
             onClick={closeTagEditor}
             className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:bg-white/5 transition-colors"

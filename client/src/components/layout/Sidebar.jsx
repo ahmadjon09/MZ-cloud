@@ -1,6 +1,7 @@
 /**
  * MZ-CLOUD Sidebar (Mobile Responsive & react-icons/fi Only)
  * Responsive navigation drawer for mobile and resizable sidebar for desktop
+ * Zero overall storage limits (Unlimited capacity displayed)
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,8 +66,6 @@ export default function Sidebar() {
     if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   };
-
-  const storagePercentage = user ? Math.min(100, Math.round((user.storageUsed / (10 * 1024 * 1024 * 1024)) * 100)) : 5;
 
   const sidebarContent = (
     <>
@@ -190,21 +189,19 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Footer Storage Progress Bar */}
+      {/* Footer Storage Progress Bar (Unlimited Capacity Display) */}
       {(!isSidebarCollapsed || isMobileSidebarOpen) && user && (
         <div className="p-4 border-t border-white/10 bg-[#17212b]/50">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-300 mb-1.5">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-300 mb-1">
             <span className="flex items-center space-x-1">
               <FiHardDrive className="w-3.5 h-3.5 text-[#2481cc]" />
               <span>{t('sidebar.storageUsed')}</span>
             </span>
-            <span>{formatSize(user.storageUsed)}</span>
+            <span className="text-white font-bold">{formatSize(user.storageUsed)}</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#2481cc] transition-all duration-500"
-              style={{ width: `${Math.max(5, storagePercentage)}%` }}
-            />
+          <div className="text-[10px] text-emerald-400 flex items-center justify-between">
+            <span>Cheksiz Xotira / Unlimited</span>
+            <span>∞ GB</span>
           </div>
         </div>
       )}

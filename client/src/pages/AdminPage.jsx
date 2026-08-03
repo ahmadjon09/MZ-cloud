@@ -1,6 +1,7 @@
 /**
  * Super Admin Control Panel Page (MZ-CLOUD - react-icons/fi)
- * Features: Live Server Health, Redis/DB/Queue Status, User Management (Ban/Unban, Roles), Audit Logs, and Broadcast
+ * Features: Add New Admin, Promote/Demote Roles, Live Server Health, Redis/DB/Queue Status, User Management (Ban/Unban, Roles), Audit Logs, and Broadcast
+ * Privacy enforced: Admins can ONLY see uploaded file count & storage used; never other users' files
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,13 +16,17 @@ import {
   FiRadio,
   FiSend,
   FiAlertTriangle,
-  FiStar
+  FiStar,
+  FiUserPlus,
+  FiCheck
 } from 'react-icons/fi';
 import {
   useAdminAnalytics,
   useAdminUsers,
   useSetUserBanStatus,
-  useBroadcastMessage
+  useBroadcastMessage,
+  useAddAdmin,
+  useUpdateUserRole
 } from '../hooks/useAdmin';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -34,16 +39,19 @@ export default function AdminPage() {
   const { data: usersData, isLoading: usersLoading } = useAdminUsers({ search: searchUser });
   const setUserBan = useSetUserBanStatus();
   const broadcast = useBroadcastMessage();
+  const addAdminMutation = useAddAdmin();
+  const updateRoleMutation = useUpdateUserRole();
 
   const [broadcastText, setBroadcastText] = React.useState('');
+  const [newAdminInput, setNewAdminInput] = React.useState('');
   const [banReasonModal, setBanReasonModal] = React.useState(null);
   const [banReasonText, setBanReasonText] = React.useState('');
 
   if (analyticsLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center py-20 text-slate-400">
+      <div className="flex-1 flex items-center justify-center py-20 text-slate-400 font-sans">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-3 border-[#2481cc] border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading MZ-CLOUD Admin Metrics...</span>
         </div>
       </div>
@@ -68,6 +76,20 @@ export default function AdminPage() {
     setBroadcastText('');
   };
 
+  const handleAddAdmin = (e) => {
+    e.preventDefault();
+    if (!newAdminInput.trim()) return;
+    addAdminMutation.mutate({ telegramIdOrUsername: newAdminInput.trim() });
+    setNewAdminInput('');
+  };
+
+  const handleToggleAdminRole = (targetUser) => {
+    const newRole = targetUser.role === 'ADMIN' ? 'USER' : 'ADMIN';
+    if (window.confirm(`${targetUser.firstName} rolining yangi qiymati ${newRole} bo'lsinmi?`)) {
+      updateRoleMutation.mutate({ userId: targetUser.id, role: newRole });
+    }
+  };
+
   const handleConfirmBan = () => {
     if (!banReasonModal) return;
     setUserBan.mutate({
@@ -80,142 +102,194 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 min-h-screen font-sans">
-      {/* Title Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-3 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white shadow-lg">
-            <FiShield className="w-6 h-6" />
+    <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 min-h-screen font-sans bg-gradient-to-b from-[#17212b] to-[#131b23]">
+      {/* Title Hero Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-[#1e2329]/90 border border-white/10 rounded-3xl shadow-2xl backdrop-blur-xl">
+        <div className="flex items-center space-x-4">
+          <div className="p-4 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white shadow-xl border border-amber-400/30">
+            <FiShield className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
-              {t('admin.title')}
-            </h1>
-            <p className="text-xs text-slate-400">
-              MZ-CLOUD Live monitoring, user access control, and server health
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
+                {t('admin.title')}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                SUPER ADMIN
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              MZ-CLOUD Live infrastructure monitoring, user access control, and server health
             </p>
           </div>
         </div>
 
-        <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-          SUPER ADMIN MODE
-        </span>
+        <div className="flex items-center space-x-3 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span>ZERO-SERVER STORAGE ACTIVE</span>
+        </div>
       </div>
 
-      {/* Top Cards: Total Users, Total Storage, CDN Files, Live Server Health */}
+      {/* Top Stat Cards: Total Users, Total Storage, CDN Files, Live Server Health */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="p-5 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm flex items-center justify-between backdrop-blur-md">
+        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl flex items-center justify-between backdrop-blur-md hover:border-[#2481cc]/60 transition-all group">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
               {t('admin.totalUsers')}
             </span>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-3xl font-extrabold text-white">
               {platform.totalUsers || 1}
             </div>
-            <span className="text-xs text-amber-500 font-medium mt-1 inline-flex items-center">
-              <FiStar className="w-3.5 h-3.5 fill-amber-500 mr-1" />
+            <span className="text-xs text-amber-400 font-medium mt-1.5 inline-flex items-center">
+              <FiStar className="w-3.5 h-3.5 fill-amber-400 mr-1" />
               <span>{platform.premiumUsers || 1} Premium</span>
             </span>
           </div>
-          <FiUsers className="w-10 h-10 text-[#2481cc] opacity-80" />
+          <div className="p-3.5 rounded-2xl bg-[#2481cc]/10 text-[#2481cc] group-hover:scale-110 transition-transform">
+            <FiUsers className="w-8 h-8" />
+          </div>
         </div>
 
-        <div className="p-5 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm flex items-center justify-between backdrop-blur-md">
+        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl flex items-center justify-between backdrop-blur-md hover:border-emerald-500/60 transition-all group">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
               {t('admin.storageUsed')}
             </span>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-3xl font-extrabold text-white">
               {formatSize(platform.totalStorageUsed)}
             </div>
-            <span className="text-xs text-emerald-500 font-medium mt-1 inline-block">
+            <span className="text-xs text-emerald-400 font-medium mt-1.5 inline-block">
               Telegram CDN Storage
             </span>
           </div>
-          <FiHardDrive className="w-10 h-10 text-emerald-500 opacity-80" />
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+            <FiHardDrive className="w-8 h-8" />
+          </div>
         </div>
 
-        <div className="p-5 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm flex items-center justify-between backdrop-blur-md">
+        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl flex items-center justify-between backdrop-blur-md hover:border-blue-500/60 transition-all group">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
               {t('admin.totalFiles')}
             </span>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-3xl font-extrabold text-white">
               {platform.totalFilesCount || 0}
             </div>
-            <span className="text-xs text-blue-500 font-medium mt-1 inline-block">
+            <span className="text-xs text-blue-400 font-medium mt-1.5 inline-block">
               Active Files
             </span>
           </div>
-          <FiFileText className="w-10 h-10 text-blue-500 opacity-80" />
+          <div className="p-3.5 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+            <FiFileText className="w-8 h-8" />
+          </div>
         </div>
 
-        <div className="p-5 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm flex items-center justify-between backdrop-blur-md">
+        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl flex items-center justify-between backdrop-blur-md hover:border-purple-500/60 transition-all group">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
               {t('admin.queueLen')}
             </span>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-3xl font-extrabold text-white">
               {health.queueLength || 0}
             </div>
-            <span className="text-xs text-purple-500 font-medium mt-1 inline-block">
+            <span className="text-xs text-purple-400 font-medium mt-1.5 inline-block">
               Parallel Worker Pool
             </span>
           </div>
-          <FiActivity className="w-10 h-10 text-purple-500 opacity-80" />
+          <div className="p-3.5 rounded-2xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform">
+            <FiActivity className="w-8 h-8" />
+          </div>
         </div>
       </div>
 
       {/* Live Server Health Panel */}
-      <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm backdrop-blur-md">
+      <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center space-x-2">
           <FiServer className="w-4 h-4 text-[#2481cc]" />
           <span>{t('admin.health')}</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-          <div className="p-3 rounded-xl bg-[#17212b]/80 border border-white/10">
-            <span className="text-slate-400 block mb-1">PostgreSQL Database</span>
+          <div className="p-4 rounded-xl bg-[#17212b]/80 border border-white/10 flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block mb-2">PostgreSQL Database</span>
             <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-white">{health.dbStatus || 'ONLINE'}</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-bold text-white text-sm">{health.dbStatus || 'ONLINE'}</span>
               <span className="text-[10px] text-slate-400">({health.dbLatencyMs || 2}ms)</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#17212b]/80 border border-white/10">
-            <span className="text-slate-400 block mb-1">Redis Search / Queue Cache</span>
+          <div className="p-4 rounded-xl bg-[#17212b]/80 border border-white/10 flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block mb-2">Redis Search / Queue Cache</span>
             <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-white">{health.redisStatus || 'ONLINE'}</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-bold text-white text-sm">{health.redisStatus || 'ONLINE'}</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#17212b]/80 border border-white/10">
-            <span className="text-slate-400 block mb-1">RAM Memory Usage</span>
-            <div className="font-bold text-white">
+          <div className="p-4 rounded-xl bg-[#17212b]/80 border border-white/10 flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block mb-2">RAM Memory Usage</span>
+            <div className="font-bold text-white text-sm">
               {health.usedMemoryMb || 120} MB / {health.totalMemoryMb || 4096} MB ({health.memoryUsagePercent || 15}%)
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#17212b]/80 border border-white/10">
-            <span className="text-slate-400 block mb-1">CPU Load Average</span>
-            <div className="font-bold text-white">
+          <div className="p-4 rounded-xl bg-[#17212b]/80 border border-white/10 flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block mb-2">CPU Load Average</span>
+            <div className="font-bold text-white text-sm">
               {health.cpuLoadAverage || '0.12'}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Add New Admin Section */}
+      <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+              <FiUserPlus className="w-4 h-4 text-amber-500" />
+              <span>Yangi Admin Qo'shish / Promote New Admin</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Telegram ID (masalan: 123456789) yoki @username orqali foydalanuvchini Admin rolini bering
+            </p>
+          </div>
+
+          <form onSubmit={handleAddAdmin} className="flex items-center space-x-2 w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="Telegram ID or username..."
+              value={newAdminInput}
+              onChange={(e) => setNewAdminInput(e.target.value)}
+              className="px-3.5 py-2 text-xs bg-[#17212b] border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-64"
+            />
+            <button
+              type="submit"
+              disabled={addAdminMutation.isPending}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-xs rounded-xl shadow-md transition-all flex items-center space-x-1 whitespace-nowrap disabled:opacity-50"
+            >
+              <FiUserPlus className="w-4 h-4" />
+              <span>{addAdminMutation.isPending ? 'Qo\'shilmoqda...' : 'Admin Qo\'shish'}</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
       {/* Two Column Grid: User Management & Broadcast Announcement */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left 2 Cols: User Management Table */}
-        <div className="lg:col-span-2 p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm backdrop-blur-md">
+        <div className="lg:col-span-2 p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
-              <FiUsers className="w-4 h-4 text-[#2481cc]" />
-              <span>{t('admin.userManagement')}</span>
-            </h3>
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                <FiUsers className="w-4 h-4 text-[#2481cc]" />
+                <span>{t('admin.userManagement')}</span>
+              </h3>
+              <span className="text-[10px] text-slate-400">
+                Maxfiy: Adminlar foydalanuvchilarning fayl nomlari yoki tarkibini ko'ra olmaydi; faqat hajmi va fayl soni ko'rinadi.
+              </span>
+            </div>
 
             <div className="relative w-full sm:w-64">
               <FiSearch className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -231,38 +305,48 @@ export default function AdminPage() {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse min-w-[450px]">
+            <table className="w-full text-left text-xs border-collapse min-w-[550px]">
               <thead>
                 <tr className="border-b border-white/10 text-slate-400 bg-[#17212b]/60">
-                  <th className="py-2.5 px-3">User</th>
-                  <th className="py-2.5 px-3">Role</th>
-                  <th className="py-2.5 px-3">Storage</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-3 px-3 font-semibold">User</th>
+                  <th className="py-3 px-3 font-semibold">Role</th>
+                  <th className="py-3 px-3 font-semibold">Storage</th>
+                  <th className="py-3 px-3 font-semibold">File Count</th>
+                  <th className="py-3 px-3 font-semibold">Status</th>
+                  <th className="py-3 px-3 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {usersList.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/5">
+                  <tr key={u.id} className="hover:bg-white/5 transition-colors">
                     <td className="py-3 px-3 font-medium text-white">
                       <div>{u.firstName} {u.lastName || ''}</div>
                       <div className="text-[10px] text-slate-400">@{u.username || u.telegramId}</div>
                     </td>
                     <td className="py-3 px-3">
-                      <span className={`px-2 py-0.5 rounded font-semibold text-[10px] ${
-                        u.role === 'SUPER_ADMIN' ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-500'
-                      }`}>
+                      <button
+                        onClick={() => handleToggleAdminRole(u)}
+                        title="Click to toggle Admin Role"
+                        className={`px-2.5 py-1 rounded font-semibold text-[10px] transition-transform active:scale-95 ${
+                          u.role === 'SUPER_ADMIN'
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 cursor-default'
+                            : u.role === 'ADMIN'
+                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20'
+                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20'
+                        }`}
+                      >
                         {u.role}
-                      </span>
+                      </button>
                     </td>
                     <td className="py-3 px-3 text-slate-400">{formatSize(u.storageUsed)}</td>
+                    <td className="py-3 px-3 text-slate-300 font-semibold">{u.fileCount || 0}</td>
                     <td className="py-3 px-3">
                       {u.isBanned ? (
-                        <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-500 font-semibold">
+                        <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-400 font-semibold border border-red-500/20">
                           Banned
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
                           Active
                         </span>
                       )}
@@ -271,10 +355,10 @@ export default function AdminPage() {
                       {u.role !== 'SUPER_ADMIN' && (
                         <button
                           onClick={() => setBanReasonModal({ userId: u.id, isBanned: !u.isBanned })}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
                             u.isBanned
-                              ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
-                              : 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white'
+                              ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20'
+                              : 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20'
                           }`}
                         >
                           {u.isBanned ? 'Unban' : 'Ban'}
@@ -289,7 +373,7 @@ export default function AdminPage() {
         </div>
 
         {/* Right 1 Col: Broadcast Announcement Tool */}
-        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm flex flex-col justify-between backdrop-blur-md">
+        <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl flex flex-col justify-between backdrop-blur-md">
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center space-x-2">
               <FiRadio className="w-4 h-4 text-amber-500" />
@@ -301,7 +385,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleBroadcast} className="space-y-3">
               <textarea
-                rows="5"
+                rows="6"
                 required
                 placeholder="Write announcement (Markdown supported)..."
                 value={broadcastText}
@@ -312,7 +396,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={broadcast.isPending}
-                className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-md transition-all disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-md transition-all disabled:opacity-50"
               >
                 <FiSend className="w-4 h-4" />
                 <span>{broadcast.isPending ? 'Broadcasting...' : t('admin.broadcastSend')}</span>
@@ -323,7 +407,7 @@ export default function AdminPage() {
       </div>
 
       {/* Audit Logs Section */}
-      <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-sm backdrop-blur-md">
+      <div className="p-6 bg-[#1e2329]/90 border border-white/10 rounded-2xl shadow-xl backdrop-blur-md">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center space-x-2">
           <FiActivity className="w-4 h-4 text-[#2481cc]" />
           <span>{t('admin.auditLogs')}</span>
@@ -336,7 +420,7 @@ export default function AdminPage() {
             recentLogs.map((log) => (
               <div
                 key={log.id}
-                className="p-2.5 rounded-xl bg-[#17212b]/60 flex items-center justify-between border border-white/5"
+                className="p-3 rounded-xl bg-[#17212b]/60 flex items-center justify-between border border-white/5"
               >
                 <div className="flex items-center space-x-3">
                   <span className="font-semibold text-[#2481cc]">{log.action}</span>
@@ -371,20 +455,20 @@ export default function AdminPage() {
                 placeholder="Reason for ban (e.g. Terms violation)..."
                 value={banReasonText}
                 onChange={(e) => setBanReasonText(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-[#17212b] border border-white/10 rounded-xl text-white"
+                className="w-full px-3 py-2 text-xs bg-[#17212b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-red-500"
               />
             )}
 
             <div className="flex justify-end space-x-2 pt-2">
               <button
                 onClick={() => setBanReasonModal(null)}
-                className="px-4 py-1.5 text-xs text-slate-400 hover:bg-white/5 rounded-xl"
+                className="px-4 py-1.5 text-xs text-slate-400 hover:bg-white/5 rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmBan}
-                className="px-4 py-1.5 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-sm"
+                className="px-4 py-1.5 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-sm transition-colors"
               >
                 Confirm
               </button>

@@ -1,7 +1,8 @@
 /**
  * File Controller (Production Quality - MZ-CLOUD)
  * API endpoints for managing Saved Messages / File items & parallel upload batching
- * Includes live Telegram CDN thumbnail streaming, file stream/download, and "Send by Telegram"
+ * Features HTTP Range-supporting Telegram CDN media streaming (/preview, /stream, /thumbnail, /download)
+ * Zero default audio/video fallbacks; streams real Telegram CDN media
  */
 const axios = require('axios');
 const fileService = require('../services/file.service');
@@ -56,9 +57,11 @@ class FileController {
   }
 
   /**
-   * Securely stream Telegram CDN photo or thumbnail to the WebApp gallery
+   * Universal Telegram CDN Media Streamer (HTTP Range Supported)
+   * Handles /preview, /stream, /thumbnail, /download
+   * Forwards Range headers (bytes=0-) so <video> and <audio> seeking works natively
    */
-  async getThumbnail(req, res, next) {
+  async streamTelegramFile(req, res, next) {
     try {
       const file = await fileService.getFileById(req.params.id, req.user.id);
       if (!file) {
@@ -68,91 +71,71 @@ class FileController {
         });
       }
 
-      if (file.thumbnailUrl) {
+      if (file.thumbnailUrl && req.path.includes('thumbnail')) {
         return res.redirect(file.thumbnailUrl);
       }
 
       const bot = telegramBot.getBot();
-      if (bot && bot.telegram && file.fileId) {
-        try {
-          const cdnLink = await bot.telegram.getFileLink(file.fileId);
-          const cdnUrl = cdnLink.href || cdnLink.toString();
-
-          const cdnResponse = await axios({
-            url: cdnUrl,
-            method: 'GET',
-            responseType: 'stream'
-          });
-
-          res.setHeader('Content-Type', cdnResponse.headers['content-type'] || 'image/jpeg');
-          res.setHeader('Cache-Control', 'public, max-age=86400');
-          return cdnResponse.data.pipe(res);
-        } catch (cdnErr) {
-          logger.warn({ err: cdnErr.message, fileId: file.fileId }, 'Could not stream from Telegram CDN, using fallback image');
-        }
-      }
-
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="none">
-        <rect width="600" height="400" fill="#1e2329"/>
-        <circle cx="300" cy="180" r="48" fill="#2481cc" opacity="0.2"/>
-        <path d="M280 180L320 180M300 160L300 200" stroke="#2481cc" stroke-width="6" stroke-linecap="round"/>
-        <text x="300" y="270" fill="#a0aec0" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">${file.fileName}</text>
-        <text x="300" y="300" fill="#718096" font-family="sans-serif" font-size="14" text-anchor="middle">Telegram CDN Cloud Photo</text>
-      </svg>`;
-
-      res.setHeader('Content-Type', 'image/svg+xml');
-      res.setHeader('Cache-Control', 'public, max-age=3600');
-      return res.status(200).send(svg);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /**
-   * Securely stream or download real media file from Telegram CDN
-   */
-  async getDownload(req, res, next) {
-    try {
-      const file = await fileService.getFileById(req.params.id, req.user.id);
-      if (!file) {
-        return res.status(404).json({
+      if (!bot || !bot.telegram || !file.fileId) {
+        return res.status(502).json({
           success: false,
-          error: { code: 'ERR_NOT_FOUND', message: 'File not found or access denied' }
+          error: {
+            code: 'ERR_TELEGRAM_CDN',
+            message: 'Telegram Bot CDN token is offline or fileId missing. Connect a live TELEGRAM_BOT_TOKEN to stream original CDN files.'
+          }
         });
       }
 
-      const bot = telegramBot.getBot();
-      if (bot && bot.telegram && file.fileId) {
-        try {
-          const cdnLink = await bot.telegram.getFileLink(file.fileId);
-          const cdnUrl = cdnLink.href || cdnLink.toString();
+      try {
+        const cdnLink = await bot.telegram.getFileLink(file.fileId);
+        const cdnUrl = cdnLink.href || cdnLink.toString();
 
-          const cdnResponse = await axios({
-            url: cdnUrl,
-            method: 'GET',
-            responseType: 'stream'
-          });
-
-          const isDownload = req.query.download === 'true';
-          res.setHeader('Content-Type', file.mimeType || cdnResponse.headers['content-type'] || 'application/octet-stream');
-          res.setHeader(
-            'Content-Disposition',
-            `${isDownload ? 'attachment' : 'inline'}; filename="${encodeURIComponent(file.fileName)}"`
-          );
-          res.setHeader('Cache-Control', 'public, max-age=86400');
-          return cdnResponse.data.pipe(res);
-        } catch (cdnErr) {
-          logger.warn({ err: cdnErr.message, fileId: file.fileId }, 'Could not stream from Telegram CDN download link');
+        const range = req.headers.range; // e.g. "bytes=0-"
+        const requestHeaders = {};
+        if (range) {
+          requestHeaders['Range'] = range;
         }
+
+        const cdnResponse = await axios({
+          url: cdnUrl,
+          method: 'GET',
+          headers: requestHeaders,
+          responseType: 'stream',
+          validateStatus: (status) => status === 200 || status === 206
+        });
+
+        // Forward HTTP status (200 OK or 206 Partial Content)
+        res.status(cdnResponse.status);
+
+        const ct = file.mimeType || cdnResponse.headers['content-type'] || 'application/octet-stream';
+        res.setHeader('Content-Type', ct);
+
+        const isDownload = req.query.download === 'true';
+        res.setHeader(
+          'Content-Disposition',
+          `${isDownload ? 'attachment' : 'inline'}; filename="${encodeURIComponent(file.fileName)}"`
+        );
+
+        // Forward Range and caching headers essential for HTML5 <video> & <audio> seeking
+        const cr = cdnResponse.headers['content-range'];
+        const al = cdnResponse.headers['accept-ranges'] || 'bytes';
+        const cl = cdnResponse.headers['content-length'];
+
+        if (cr) res.setHeader('Content-Range', cr);
+        if (al) res.setHeader('Accept-Ranges', al);
+        if (cl) res.setHeader('Content-Length', cl);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+        return cdnResponse.data.pipe(res);
+      } catch (cdnErr) {
+        logger.error({ err: cdnErr.message, fileId: file.fileId }, 'Telegram CDN stream failed');
+        const msg = String(cdnErr?.message || cdnErr);
+        if (msg.includes('file is too big')) {
+          return res.status(413).json({ error: 'FILE_TOO_BIG_FOR_PREVIEW' });
+        }
+        return res.status(502).json({ error: 'Telegram fetch failed: ' + msg });
       }
-
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: 'ERR_TELEGRAM_CDN',
-          message: 'Telegram CDN file stream unavailable in simulation mode. Connect a live TELEGRAM_BOT_TOKEN to stream original CDN files.'
-        }
-      });
     } catch (err) {
       next(err);
     }
@@ -248,7 +231,6 @@ class FileController {
         }
       }
 
-      // Simulated response if running in local dev / without live Bot Token
       logger.info({ fileId: file.id }, '✈️ Simulated sendToTelegram in dev mode');
       return res.status(200).json({
         success: true,

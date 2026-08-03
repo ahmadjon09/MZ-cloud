@@ -1,6 +1,7 @@
 /**
  * Private Notes Markdown Editor Modal (MZ-CLOUD - react-icons/fi)
  * Attach private notes, links, and checkable task lists to any file item
+ * 100% Mobile Responsive
  */
 import React from 'react';
 import {
@@ -52,20 +53,20 @@ export default function NoteEditorModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 font-sans">
       <div
-        className="w-full max-w-2xl bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col font-sans"
+        className="w-full max-w-lg sm:max-w-2xl bg-[#1e2329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 flex items-center justify-between bg-[#17212b]">
           <div className="flex items-center space-x-2.5">
             <FiFileText className="w-5 h-5 text-[#2481cc]" />
             <div>
-              <h3 className="font-semibold text-sm text-white">
+              <h3 className="font-semibold text-xs sm:text-sm text-white">
                 Private Notes & Caption
               </h3>
-              <span className="text-xs text-slate-400">
+              <span className="text-[10px] sm:text-xs text-slate-400">
                 File: {file.fileName}
               </span>
             </div>
@@ -77,7 +78,7 @@ export default function NoteEditorModal() {
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {/* Telegram Caption Box */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -94,12 +95,12 @@ export default function NoteEditorModal() {
 
           {/* Private Notes Editor Toolbar */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-1.5">
               <label className="text-xs font-semibold text-slate-300">
-                Private Markdown Notes (Checklists supported)
+                Private Markdown Notes
               </label>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center flex-wrap gap-1.5">
                 <button
                   type="button"
                   onClick={insertChecklist}
@@ -128,12 +129,12 @@ export default function NoteEditorModal() {
             </div>
 
             {isPreview ? (
-              <div className="w-full h-48 p-4 bg-[#17212b]/80 border border-white/10 rounded-xl text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed text-slate-200">
+              <div className="w-full h-44 sm:h-48 p-4 bg-[#17212b]/80 border border-white/10 rounded-xl text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed text-slate-200">
                 {notes ? notes : <span className="text-slate-400 italic">No notes written.</span>}
               </div>
             ) : (
               <textarea
-                rows="7"
+                rows="6"
                 placeholder="Write private notes, markdown check-items (- [ ] Task 1), or reference links..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -144,7 +145,7 @@ export default function NoteEditorModal() {
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#17212b] flex items-center justify-end space-x-3">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-white/10 bg-[#17212b] flex items-center justify-end space-x-3">
           <button
             onClick={closeNoteEditor}
             className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:bg-white/5 transition-colors"

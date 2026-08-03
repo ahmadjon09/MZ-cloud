@@ -1,7 +1,7 @@
 /**
  * Versioned API Router - /api/v1 (MZ-CLOUD)
  * Complete RESTful routes for Telegram Cloud Storage Platform
- * Includes "Send by Telegram" endpoint (/files/:id/send-to-telegram)
+ * Includes HTTP Range-supported Telegram CDN streaming endpoints (/preview, /stream, /thumbnail, /download)
  */
 const express = require('express');
 const authController = require('../controllers/auth.controller');
@@ -51,9 +51,10 @@ router.post('/files', authMiddleware, validateRequest(createFileSchema), fileCon
 router.post('/files/parallel-upload', authMiddleware, validateRequest(bulkCreateFilesSchema), fileController.parallelUpload);
 router.delete('/files/recycle-bin/empty', authMiddleware, fileController.emptyRecycleBin);
 router.get('/files/:id', authMiddleware, fileController.getFileById);
-router.get('/files/:id/thumbnail', authMiddleware, fileController.getThumbnail);
-router.get('/files/:id/download', authMiddleware, fileController.getDownload);
-router.get('/files/:id/stream', authMiddleware, fileController.getDownload);
+router.get('/files/:id/thumbnail', authMiddleware, fileController.streamTelegramFile);
+router.get('/files/:id/preview', authMiddleware, fileController.streamTelegramFile);
+router.get('/files/:id/stream', authMiddleware, fileController.streamTelegramFile);
+router.get('/files/:id/download', authMiddleware, fileController.streamTelegramFile);
 router.post('/files/:id/send-to-telegram', authMiddleware, fileController.sendToTelegram);
 router.patch('/files/:id', authMiddleware, validateRequest(updateFileSchema), fileController.updateFile);
 router.post('/files/:id/move', authMiddleware, fileController.moveFile);
@@ -76,6 +77,7 @@ router.get('/search', authMiddleware, searchController.search);
 // Super Admin Panel Routes (Requires ADMIN or SUPER_ADMIN Role)
 router.get('/admin/analytics', authMiddleware, requireRole(ROLES.ADMIN, ROLES.SUPER_ADMIN), adminController.getAnalytics);
 router.get('/admin/users', authMiddleware, requireRole(ROLES.ADMIN, ROLES.SUPER_ADMIN), adminController.listUsers);
+router.post('/admin/add-admin', authMiddleware, requireRole(ROLES.SUPER_ADMIN), adminController.addAdmin);
 router.patch('/admin/users/:id/ban', authMiddleware, requireRole(ROLES.ADMIN, ROLES.SUPER_ADMIN), adminController.setUserBanStatus);
 router.patch('/admin/users/:id/role', authMiddleware, requireRole(ROLES.SUPER_ADMIN), adminController.updateUserRole);
 router.post('/admin/broadcast', authMiddleware, requireRole(ROLES.ADMIN, ROLES.SUPER_ADMIN), adminController.broadcastMessage);

@@ -5,7 +5,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 require('dotenv').config();
-
+const { default: axios } = require('axios');
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -24,7 +24,6 @@ const { initCronJobs } = require('./cron/cleanup.cron');
 const securityMiddleware = require('./middlewares/security.middleware');
 const errorHandler = require('./middlewares/error.middleware');
 const apiV1Router = require('./routes/api.v1');
-const { default: axios } = require('axios');
 
 const app = express();
 const server = http.createServer(app);
@@ -35,6 +34,16 @@ app.set('io', io);
 
 // Security & Performance Middlewares
 app.use(securityMiddleware);
+
+// Explicit Cross-Origin Headers for Vercel -> Render Media Streams
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Telegram-Init-Data, X-Telegram-User-Id, X-Telegram-User-Data, X-Demo-User-Id');
+  next();
+});
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -83,7 +92,21 @@ app.get('/api/health', async (req, res) => {
 
 // API Version 1 Routes
 app.use('/api/v1', apiV1Router);
+const keepServerAlive = () => {
+  if (!process.env.BASE_URL) {
+    console.warn('⚠️ BASE_URL is not set. Skipping ping.')
+    return
+  }
 
+  setInterval(() => {
+    axios
+      .get(`${process.env.BASE_URL}/api/health`)
+      .then(() => console.log('🔄 Server active'))
+      .catch(err => console.log('⚠️ Ping failed:', err.message))
+  }, 10 * 60 * 1000)
+}
+
+keepServerAlive()
 // Serve Frontend build in Production if present
 const clientDistPath = path.resolve(__dirname, '../client/dist');
 app.use(express.static(clientDistPath));
@@ -111,21 +134,6 @@ app.use(errorHandler);
 telegramBot.init(io);
 initCronJobs();
 
-const keepServerAlive = () => {
-  if (!process.env.BASE_URL) {
-    console.warn('⚠️ BASE_URL is not set. Skipping ping.')
-    return
-  }
-
-  setInterval(() => {
-    axios
-      .get(`${process.env.BASE_URL}/api/health`)
-      .then(() => console.log('🔄 Server active'))
-      .catch(err => console.log('⚠️ Ping failed:', err.message))
-  }, 10 * 60 * 1000)
-}
-
-keepServerAlive()
 // Start HTTP Server
 const PORT = appConfig.port || 5000;
 server.listen(PORT, '0.0.0.0', () => {

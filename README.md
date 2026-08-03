@@ -13,12 +13,8 @@ Unlike traditional storage platforms that require massive server hard drive arra
 
 - **Never Save Files to Server Disk:** All Photos, Videos, Audio tracks, Voice notes, Documents, Archives, and Code files stay 100% inside Telegram servers.
 - **Strict Multi-Tenant Data Isolation:** Every database query strictly filters by `userId` or `user.telegramId`. No user can ever view, search, or access another user's files or folders.
-- **What Our Server Stores:**
-  - Telegram `fileId` and `uniqueFileId` references.
-  - User-defined nested folder hierarchy.
-  - Private Markdown notes and checkable task lists.
-  - Colored tags (`#photo`, `#work`, `#uzbekistan`).
-  - Full-Text Search (FTS) vector index.
+- **Strict Admin Privacy:** Even MZ-CLOUD Administrators (`ADMIN` / `SUPER_ADMIN`) cannot view, list, or search other users' filenames or file contents. Admins can only view aggregate storage statistics (`fileCount`, `storageUsed`).
+- **Unlimited Overall Storage Capacity:** No total storage quota (`obshi limit bolmasin`). Users can store unlimited data in MZ-CLOUD.
 - **Telegram Bot API Size Limits Enforced:**
   - 🖼️ **Photos / Images:** Maximum **10 MB** per image.
   - 🎬 **Videos / Audio / Documents / Archives:** Maximum **50 MB** per item (enforces Telegram Bot upload constraints).
@@ -31,31 +27,34 @@ Unlike traditional storage platforms that require massive server hard drive arra
 - **Exclusive Telegram App Access:** Cannot be opened in external web browsers. Enforces `window.Telegram.WebApp` verification.
 - **Live User Profile Avatar:** Displays the user's current Telegram profile photo (`user.profilePhoto` / `photo_url`) in the dashboard header.
 - Automatically assigns `SUPER_ADMIN` role to the user matching `ADMIN_TELEGRAM_ID`.
+- **100% Full-Screen Desktop & Mobile Viewport:** Uses `h-full w-full min-h-screen flex flex-col` so that whether opened on Telegram Desktop or Telegram Mobile, the app fills the entire screen height without gaps or scroll breaks.
 
-### 2. 🔍 Telegram Inline Search Mode (`@MZCloudBot <query>`)
-- Users can type `@MZCloudBot <query>` inside **any Telegram chat, group, or channel** to instantly search all of their personal cloud files and send an interactive file card to their friends!
+### 2. 🎬 HTTP Range-Supported Telegram CDN Media Streaming
+- **Native Video & Audio Seeking:** `/api/v1/files/:id/stream` and `/preview` automatically forward HTTP Range headers (`Range: bytes=0-`) to Telegram CDN and respond with **HTTP 206 Partial Content**, `Content-Range`, and `Accept-Ranges: bytes`.
+- **Zero Default / Fallback Audio or Video:** All default audio/video fallbacks have been removed. Media tags stream the real Telegram CDN file.
 
-### 3. 📱 100% Mobile Responsive & Feather Vector Icons (`react-icons/fi`)
+### 3. ✈️ "Send by Telegram" (Forward directly to your chat)
+- Click **"✈️ Telegram chatingizga yuborish / Send to my Telegram"** on any file card, gallery viewer, or shared page to instantly have `@MZCloudBot` send the original Telegram CDN file directly to your personal Telegram chat.
+
+### 4. 🔍 Telegram Inline Search Mode (`@MZCloudBot <query>`)
+- Users can type `@MZCloudBot <query>` inside **any Telegram chat, group, or channel** to instantly search all of their personal cloud files and send an interactive file card to their friends.
+
+### 5. ⭐ Zero Ads for Telegram Premium Users
+- Users with **Telegram Premium (`user.isPremium === true`)** enjoy a 100% ad-free experience. Non-premium users see a non-intrusive sponsorship banner.
+
+### 6. 📱 100% Mobile Responsive across All Modals & Feather Vector Icons (`react-icons/fi`)
 - Built with crisp **Feather Icons (`react-icons/fi`)** across the entire UI (no unicode text emojis in frontend).
 - **Glassmorphism Telegram Desktop Design:** Sleek `#1e2329/90` translucent cards with Telegram Blue `#2481cc` accents and smooth micro-animations.
-- **Mobile Drawer Navigation:** Responsive slide-over hamburger drawer for mobile devices and resizable sidebar for desktop screens.
+- **Responsive Modals:** Every modal (`SearchModal`, `FolderModal`, `NoteEditorModal`, `TagEditorModal`, `ShareModal`, `TelegramGalleryModal`, `TelegramVideoModal`, `CodeDocumentModal`) is optimized for both desktop and mobile viewports (`max-w-lg sm:max-w-2xl max-h-[92vh] p-3 sm:p-6`).
 
-### 4. 🤖 Super-Fast Telegram Bot with i18n & All Interactive Menus
+### 7. 🤖 Super-Fast Telegram Bot with i18n & All Interactive Menus
 - **Lightning-Fast Execution:** Non-blocking async handlers and immediate callback query responses (`answerCbQuery`).
 - **Interactive Buttons:** `[📝 Note]` and `[🏷️ Tags]` buttons allow replying with text or selecting tags directly in Telegram.
 - **Full Bot i18n:** Automatically responds in **Uzbek (`uz`)**, **English (`en`)**, or **Russian (`ru`)** based on user language via `/lang` or language switcher menu.
 - **Every Menu Works:** Every single menu includes an interactive **"🔙 Go Back (`back_to_main`)"** button.
 
-### 5. 🖼️ Live Telegram CDN Photo Streaming & File Download
-- **Real Photo Thumbnails:** Displays actual Telegram CDN photo thumbnails in the WebApp gallery via `/api/v1/files/:id/thumbnail`.
-- **Original CDN Download / Stream:** Stream or download any original file (Photo, Video, PDF, Audio, Code) directly from Telegram CDN via `/api/v1/files/:id/download`.
-
-### 6. 📂 Enterprise Folder & Tag System
-- **Nested Folders:** Unlimited multi-level tree hierarchy with vector icons and custom hex colors.
-- **Smart Folders:** Dynamic folders filtering automatically by category (`PHOTO`, `VIDEO`, `FAVORITE`).
-- **Colored Tags:** Manage tag badges for instant filtering.
-
-### 7. 🛡️ Super Admin Panel (`/admin`)
+### 8. 🛡️ Polished Super Admin Panel (`/admin`)
+- **Add & Promote New Admins:** Super Admins can add new administrators by Telegram ID or username (`POST /api/v1/admin/add-admin`), or toggle roles directly in the user table.
 - Accessible via `/admin` in the WebApp or the **"🛡️ Super Admin Panel"** button in the bot (for authorized admins only).
 - Non-admin users are blocked with an explicit **Admin Authorization Required** screen.
 - Realtime system monitoring (Redis cache status, PostgreSQL DB latency, active worker queue length, RAM usage, CPU load).
@@ -74,7 +73,7 @@ Unlike traditional storage platforms that require massive server hard drive arra
 │   ├── constants/          # Media categories, Telegram 10MB/50MB size limits, Events, Error Codes
 │   ├── controllers/        # REST controllers (Auth, File, Folder, Search, Admin, Share)
 │   ├── cron/               # Scheduled daily Recycle Bin purge (>30 days)
-│   ├── middlewares/        # JWT + Telegram HMAC Auth, RBAC, Rate Limiting, Security, Errors
+│   ├── middlewares/        # JWT + Telegram HMAC Auth, RBAC, Rate Limiting, Security (Helmet CORS), Errors
 │   ├── prisma/             # Schema & Seed script (0 demo files; only Super Admin)
 │   ├── queues/             # Parallel upload processing worker pool
 │   ├── repositories/       # Prisma data access layer with strict userId/telegramId isolation
@@ -91,9 +90,10 @@ Unlike traditional storage platforms that require massive server hard drive arra
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── admin/      # Super Admin Panel
+│   │   │   ├── common/     # AdBanner (Hidden for Premium), MustOpenInTelegram, AdminAccessDenied
 │   │   │   ├── layout/     # Header (user profile photo avatar), Sidebar (drawer/resizable), AudioBar
 │   │   │   ├── media/      # FileGrid, FileCard, ContextMenu, Gallery/Video/Code Modals
-│   │   │   └── modals/     # SearchModal, NoteEditorModal, TagEditorModal, FolderModal, ShareModal
+│   │   │   └── modals/     # SearchModal, NoteEditorModal, TagEditorModal, FolderModal, ShareModal (All Responsive)
 │   │   ├── hooks/          # TanStack Query custom hooks
 │   │   ├── i18n/           # English, Russian, Uzbek dictionaries
 │   │   ├── pages/          # DashboardPage, AdminPage (/admin), SharedFilePage (/share/:token)
@@ -131,3 +131,4 @@ Unlike traditional storage platforms that require massive server hard drive arra
 - **Frontend URL:** `https://mz-cloud.vercel.app`
 - **Backend URL:** `https://mz-cloud.onrender.com`
 - `client/src/services/api.js` and `socket.js` automatically route API and WebSocket traffic to `https://mz-cloud.onrender.com/api/v1` when running on `vercel.app`.
+- Helmet and CORS are explicitly configured with `Cross-Origin-Resource-Policy: cross-origin` so `<img />` and `<video />` tags stream without restrictions.
