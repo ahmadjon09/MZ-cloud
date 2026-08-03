@@ -60,7 +60,8 @@ const resources = {
         save: 'Save Changes',
         cancel: 'Cancel',
         confirm: 'Confirm',
-        sendToTelegram: 'Send to my Telegram'
+        sendToTelegram: 'Send to my Telegram',
+        sending: 'Sending...'
       },
       files: {
         emptyTitle: 'Your MZ-CLOUD is Empty',
@@ -72,6 +73,10 @@ const resources = {
         notes: 'Notes',
         tags: 'Tags',
         noNotes: 'No private notes added yet.'
+      },
+      media: {
+        videoPlayerSub: 'MZ-CLOUD Telegram CDN Player — Position Auto-Remembered',
+        cdnStreamTip: 'This media is stored safely inside Telegram CDN. Click below to forward the original file directly to your Telegram chat:'
       },
       admin: {
         title: 'Super Admin Control Panel',
@@ -160,7 +165,8 @@ const resources = {
         save: 'Сохранить',
         cancel: 'Отмена',
         confirm: 'Подтвердить',
-        sendToTelegram: 'Отправить в Telegram чат'
+        sendToTelegram: 'Отправить в Telegram чат',
+        sending: 'Отправка...'
       },
       files: {
         emptyTitle: 'Ваше облако MZ-CLOUD пока пусто',
@@ -172,6 +178,10 @@ const resources = {
         notes: 'Заметки',
         tags: 'Теги',
         noNotes: 'Заметки пока не добавлены.'
+      },
+      media: {
+        videoPlayerSub: 'Плеер MZ-CLOUD — Позиция сохраняется автоматически',
+        cdnStreamTip: 'Файл хранится в Telegram CDN. Нажмите кнопку ниже, чтобы переслать оригинал в ваш чат:'
       },
       admin: {
         title: 'Панель управления Супер-Админа',
@@ -260,7 +270,8 @@ const resources = {
         save: 'Saqlash',
         cancel: 'Bekor qilish',
         confirm: 'Tasdiqlash',
-        sendToTelegram: 'Telegram chatingizga yuborish'
+        sendToTelegram: 'Telegram chatingizga yuborish',
+        sending: 'Yuborilmoqda...'
       },
       files: {
         emptyTitle: 'Sizning MZ-CLOUD bulutingiz hozircha bo‘sh',
@@ -272,6 +283,10 @@ const resources = {
         notes: 'Eslatmalar',
         tags: 'Teglar',
         noNotes: 'Hozircha shaxsiy eslatma qo‘shilmagan.'
+      },
+      media: {
+        videoPlayerSub: 'MZ-CLOUD Telegram CDN Pleyer — Ko\'rilgan vaqt avtomatik saqlanadi',
+        cdnStreamTip: 'Ushbu media Telegram CDN da saqlanmoqda. Original faylni o\'z chatingizga yuborish uchun quyidagi tugmani bosing:'
       },
       admin: {
         title: 'Super Admin Boshqaruv Paneli',

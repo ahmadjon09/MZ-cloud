@@ -1,9 +1,11 @@
 /**
- * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi)
+ * Telegram Video Player Modal (MZ-CLOUD - react-icons/fi & Full i18n)
  * Supports Playback Speed (0.5x to 2x), Picture-in-Picture, position memory, and keyboard controls
  * Includes "Send to my Telegram" button
+ * Uses getFileDownloadUrl with query auth parameter
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FiX,
   FiPlay,
@@ -17,8 +19,10 @@ import {
 } from 'react-icons/fi';
 import { useUIStore } from '../../store/useUIStore';
 import { useSendToTelegram } from '../../hooks/useFiles';
+import { getFileDownloadUrl } from '../../services/api';
 
 export default function TelegramVideoModal() {
+  const { t } = useTranslation();
   const { activeVideoModalFile, closeVideoPlayer } = useUIStore();
   const sendToTg = useSendToTelegram();
   const videoRef = React.useRef(null);
@@ -29,8 +33,10 @@ export default function TelegramVideoModal() {
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [isMuted, setIsMuted] = React.useState(false);
+  const [vidError, setVidError] = React.useState(false);
 
   React.useEffect(() => {
+    setVidError(false);
     if (videoRef.current && activeVideoModalFile) {
       const savedTime = localStorage.getItem(`tgcloud_video_pos_${activeVideoModalFile.id}`);
       if (savedTime && !isNaN(savedTime)) {
@@ -118,9 +124,9 @@ export default function TelegramVideoModal() {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  const sampleVideoUrl =
+  const videoUrl =
     activeVideoModalFile.thumbnailUrl ||
-    `/api/v1/files/${activeVideoModalFile.id}/stream`;
+    getFileDownloadUrl(activeVideoModalFile.id);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between animate-in fade-in duration-200 font-sans">
@@ -131,7 +137,7 @@ export default function TelegramVideoModal() {
             {activeVideoModalFile.fileName}
           </h3>
           <span className="text-xs text-slate-400">
-            MZ-CLOUD Telegram CDN Player — Position Auto-Remembered
+            {t('media.videoPlayerSub')}
           </span>
         </div>
 
@@ -142,7 +148,7 @@ export default function TelegramVideoModal() {
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#2481cc] hover:bg-[#2f88d2] text-white transition-colors shadow-md disabled:opacity-50"
           >
             <FiSend className="w-4 h-4" />
-            <span>{sendToTg.isPending ? 'Yuborilmoqda...' : 'Telegramga Yuborish'}</span>
+            <span>{sendToTg.isPending ? t('actions.sending') : t('actions.sendToTelegram')}</span>
           </button>
           <button
             onClick={closeVideoPlayer}
@@ -155,16 +161,37 @@ export default function TelegramVideoModal() {
 
       {/* Main Video Viewport */}
       <div className="relative flex-1 flex items-center justify-center overflow-hidden p-4">
-        <video
-          ref={videoRef}
-          src={sampleVideoUrl}
-          autoPlay
-          onTimeUpdate={handleTimeUpdate}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onClick={togglePlayPause}
-          className="max-h-[75vh] max-w-[90vw] rounded-xl shadow-2xl cursor-pointer"
-        />
+        {!vidError ? (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            autoPlay
+            controls
+            onTimeUpdate={handleTimeUpdate}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onError={() => setVidError(true)}
+            onClick={togglePlayPause}
+            className="max-h-[75vh] max-w-[90vw] rounded-xl shadow-2xl cursor-pointer"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 bg-[#1e2329] rounded-2xl border border-white/10 text-center max-w-md">
+            <div className="w-16 h-16 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center mb-4 text-2xl font-bold">
+              VIDEO
+            </div>
+            <h4 className="text-white font-semibold text-sm mb-1">{activeVideoModalFile.fileName}</h4>
+            <p className="text-xs text-slate-400 mb-4">
+              {t('media.cdnStreamTip')}
+            </p>
+            <button
+              onClick={() => sendToTg.mutate(activeVideoModalFile.id)}
+              className="px-5 py-2.5 bg-[#2481cc] hover:bg-[#2f88d2] text-white text-xs font-semibold rounded-xl shadow-md transition-all flex items-center space-x-2"
+            >
+              <FiSend className="w-4 h-4" />
+              <span>{t('actions.sendToTelegram')}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Bottom Control Bar */}

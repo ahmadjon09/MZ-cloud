@@ -92,7 +92,6 @@ app.get('/api/health', async (req, res) => {
 
 // API Version 1 Routes
 app.use('/api/v1', apiV1Router);
-
 const keepServerAlive = () => {
   if (!process.env.BASE_URL) {
     console.warn('⚠️ BASE_URL is not set. Skipping ping.')
